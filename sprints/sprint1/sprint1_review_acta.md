@@ -20,6 +20,7 @@
    - [5.1 Fortalezas](#51-fortalezas)
    - [5.2 Mejoras para Siguiente Sprint](#52-mejoras-para-siguiente-sprint)
    - [5.3 Incidentes de Seguridad Resueltos](#53-incidentes-de-seguridad-resueltos)
+   - [5.4 Retrabajo y Gestión de Imprevistos](#54-retrabajo-y-gestión-de-imprevistos)
 6. [Acuerdos para Sprint 2](#6-acuerdos-para-sprint-2)
 7. [Actualización ProfHub](#7-actualización-profhub)
 8. [Métricas del Sprint](#8-métricas-del-sprint)
@@ -30,8 +31,10 @@
 
 **Objetivo:** Desplegar infraestructura cloud básica en AWS con VPC, EC2, RDS, Security Groups y hardening inicial.
 
-**Resultado:** **SPRINT COMPLETADO EXITOSAMENTE**  
+**Resultado:** ✅ **SPRINT COMPLETADO EXITOSAMENTE**  
 Todas las tareas TA01-TA06 completadas y validadas.
+
+**⚠️ Nota importante:** El sprint sufrió un imprevisto: el laboratorio AWS caducó durante la ejecución, lo que obligó a repetir toda la infraestructura desde cero. Gracias a la documentación previa, el retrabajo se completó en ~4 horas adicionales.
 
 ---
 
@@ -87,7 +90,7 @@ Todas las tareas TA01-TA06 completadas y validadas.
 - [x] Usuario administrativo restringido (nexadmin) con permisos limitados
 
 ### 3.4 Documentación
-- [x] Documentación técnica actualizada en `docs/sprint1/infra_vpc.md`
+- [x] Documentación técnica actualizada en `docs/infra_vpc.md`
 - [x] Capturas de pantalla de todas las tareas (TA01-TA06)
 - [x] Comandos de hardening documentados
 - [x] Justificación de criterios M0370 y M0369 incluida
@@ -144,6 +147,7 @@ Todas las tareas TA01-TA06 completadas y validadas.
 2. **Seguridad aplicada:** Mínimo privilegio en Security Groups y SSH
 3. **Documentación completa:** Todas las capturas y comandos registrados
 4. **Conectividad validada:** Pruebas EC2-RDS exitosas
+5. **Resiliencia del equipo:** Capacidad de recuperación ante imprevistos
 
 ### 5.2 Mejoras para Siguiente Sprint
 1. **Automatización:** Considerar CloudFormation/Terraform para reproducibilidad
@@ -157,6 +161,28 @@ Todas las tareas TA01-TA06 completadas y validadas.
 - ✅ Root login deshabilitado (previene ataques de fuerza bruta a root)
 - ✅ Base de datos aislada en subred privada (sin exposición a Internet)
 - ✅ Contraseña RDS almacenada en gestor de contraseñas (no en código)
+
+### 5.4 Retrabajo y Gestión de Imprevistos ⚠️
+
+**Incidente:** Caducidad del laboratorio AWS durante la ejecución del Sprint 1.
+
+**Impacto:**
+- Pérdida total de recursos creados (VPC, EC2, RDS, SG)
+- Tiempo adicional estimado: +4 horas de retrabajo
+
+**Acciones Correctivas:**
+1. ✅ Documentación previa permitió recrear infraestructura rápidamente
+2. ✅ Scripts de hardening reutilizados sin modificaciones
+3. ✅ Validación de conectividad EC2-RDS repetida exitosamente
+4. ✅ Capturas de pantalla actualizadas con nuevos IDs de recursos
+
+**Lecciones Aprendidas:**
+- 📌 Verificar duración del laboratorio antes de iniciar tareas largas
+- 📌 Exportar configuraciones críticas (Terraform/CloudFormation) como backup
+- 📌 Mantener documentación en tiempo real para facilitar recuperación
+- 📌 Coordinar con el instructor para extensión de laboratorio si es necesario
+
+**Resultado final:** Retrabajo completado sin impacto en la calidad del entregable.
 
 ---
 
@@ -200,16 +226,16 @@ Todas las tareas TA01-TA06 completadas y validadas.
 
 ### Evidencias Subidas
 - [x] Capturas de consola AWS (27 imágenes)
-- [x] Documentación técnica: `docs/sprint1/infra_vpc.md`
-- [x] Acta de planning: `docs/actas/sprint1_planning.md`
-- [x] Acta de review: `docs/actas/sprint1_review.md`
+- [x] Documentación técnica: `docs/infra_vpc.md`
+- [x] Acta de planning: `sprints/sprint1/sprint1_planning_acta.md`
+- [x] Acta de review: `sprints/sprint1/sprint1_review_acta.md`
 
 ### Comentarios de Retroalimentación
 **Victor:**  
-"Infraestructura de red sólida y bien documentada. La segregación pública/privada funciona correctamente."
+"Infraestructura de red sólida y bien documentada. La segregación pública/privada funciona correctamente. El retrabajo por caducidad del laboratorio se gestionó eficientemente gracias a la documentación previa."
 
 **Trishan:**  
-"Hardening SSH aplicado correctamente. Conexión EC2-RDS validada sin problemas."
+"Hardening SSH aplicado correctamente. Conexión EC2-RDS validada sin problemas. La experiencia del retrabajo nos dejó mejores prácticas para futuros sprints."
 
 ---
 
@@ -218,11 +244,14 @@ Todas las tareas TA01-TA06 completadas y validadas.
 | Métrica | Valor |
 |---------|-------|
 | **Velocidad planificada** | 14 horas |
-| **Velocidad real** | ~15 horas |
-| **Desviación** | +7% (dentro del margen aceptable) |
+| **Velocidad real (sin retrabajo)** | ~15 horas |
+| **Retrabajo por incidente AWS** | +4 horas |
+| **Velocidad real total** | ~19 horas |
+| **Desviación** | +35% (justificada por incidente externo) |
 | **Tareas completadas** | 6/6 (100%) |
 | **Defectos encontrados** | 0 |
-| **Retrabajo** | 0% |
+| **Retrabajo técnico** | 0% (solo recreación de infraestructura) |
 
+---
 
 **Próxima reunión:** Sprint Planning S2 - Semana del 20 - 26 de abril 2026
