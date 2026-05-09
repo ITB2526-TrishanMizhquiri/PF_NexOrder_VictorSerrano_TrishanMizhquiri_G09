@@ -46,15 +46,15 @@ Todas las tareas T07-T12 completadas y validadas.
 | T07 | Servicio httpd activo (running) | ✅ Completado | Captura systemctl status | Victor |
 | T07 | Puerto 80 escuchando | ✅ Completado | Captura ss -tlnp | Victor |
 | T07 | curl localhost responde correctamente | ✅ Completado | Captura terminal | Victor |
-| T08 | mod_ssl instalado | ✅ Completado | Captura instalación | Victor |
-| T08 | Certificado autofirmado generado | ✅ Completado | Captura openssl | Victor |
-| T08 | VirtualHost HTTPS configurado (443) | ✅ Completado | Captura nexorder-ssl.conf | Victor |
-| T08 | Redirección HTTP→HTTPS (301) | ✅ Completado | Captura curl -I http://localhost | Victor |
-| T08 | Cabecera HSTS activa | ✅ Completado | Captura curl -Ik https://localhost | Victor |
-| T09 | Fail2ban instalado | ✅ Completado | Captura dnf install | Trishan |
-| T09 | Servicio fail2ban activo | ✅ Completado | Captura systemctl status | Trishan |
-| T09 | jail.local configurado (maxretry=3, bantime=1h) | ✅ Completado | Captura archivo config | Trishan |
-| T09 | fail2ban-client status sshd validado | ✅ Completado | Captura terminal | Trishan |
+| T08 | mod_ssl instalado | ✅ Completado | Captura instalación | Trishan |
+| T08 | Certificado autofirmado generado | ✅ Completado | Captura openssl | Trishan |
+| T08 | VirtualHost HTTPS configurado (443) | ✅ Completado | Captura nexorder-ssl.conf | Trishan |
+| T08 | Redirección HTTP→HTTPS (301) | ✅ Completado | Captura curl -I http://localhost | Trishan |
+| T08 | Cabecera HSTS activa | ✅ Completado | Captura curl -Ik https://localhost | Trishan |
+| T09 | Fail2ban instalado | ✅ Completado | Captura dnf install | Victor |
+| T09 | Servicio fail2ban activo | ✅ Completado | Captura systemctl status | Victor |
+| T09 | jail.local configurado (maxretry=3, bantime=1h) | ✅ Completado | Captura archivo config | Victor |
+| T09 | fail2ban-client status sshd validado | ✅ Completado | Captura terminal | Victor |
 | T10 | Base de datos nexorder_db creada | ✅ Completado | Captura MySQL | Trishan |
 | T10 | Usuario nexorder_app creado | ✅ Completado | Captura CREATE USER | Trishan |
 | T10 | Permisos limitados (SELECT, INSERT, UPDATE) | ✅ Completado | Captura SHOW GRANTS | Trishan |
@@ -62,9 +62,9 @@ Todas las tareas T07-T12 completadas y validadas.
 | T11 | ServerTokens Prod configurado | ✅ Completado | Captura httpd.conf | Victor |
 | T11 | ServerSignature Off configurado | ✅ Completado | Captura httpd.conf | Victor |
 | T11 | curl -I localhost muestra solo Apache | ✅ Completado | Captura cabeceras | Victor |
-| T12 | index.php creado y funcional | ✅ Completado | Captura navegador/curl | Ambos |
-| T12 | connexio.php validado (PDO exitoso) | ✅ Completado | Captura conexión RDS | Ambos |
-| T12 | panel.php muestra info segura | ✅ Completado | Captura consulta MySQL | Ambos |
+| T12 | index.php creado y funcional | ✅ Completado | Captura navegador/curl | Trishan |
+| T12 | connexio.php validado (PDO exitoso) | ✅ Completado | Captura conexión RDS | Trishan |
+| T12 | panel.php muestra info segura | ✅ Completado | Captura consulta MySQL | Trishan |
 
 **Total tareas:** 23  
 **Completadas:** 23 ✅  
