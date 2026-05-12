@@ -289,3 +289,290 @@ Hemos  configurado un Dashboard personalizado en CloudWatch utilizamos  widgets 
 
 Veremos esta tabla que se trata del Selector de Métricas de CloudWatch y es la herramienta que te permite ver entre todos los datos que genera tu servidor para elegir cuáles quieres vigilar
 Hemos seleccionado CPUUtilization por ser el KPI (Indicador Clave de Desempeño) más crítico de la infraestructura.
+
+![Figura 29(/img/sprint1/0-diagrama-logico.png) 
+
+hemos usado widget de tipo Número ya que widget de número permite conocer el valor exacto y actual de un solo vistazo
+
+![Figura 30(/img/sprint1/0-diagrama-logico.png) 
+
+Seleccionamos el apartado "EBS" para acceder  a los indicadores de rendimiento de los discos duros virtuales 
+
+![Figura 31(/img/sprint1/0-diagrama-logico.png) 
+
+Configuración de Métricas de Disco y como podemos ver en tabla, marcamos las opciones VolumeReadBytes y VolumeWriteBytes ya que  nos permite controlar cuánta información se lee y se escribe en el disco de la base de datos
+
+![Figura 32(/img/sprint1/0-diagrama-logico.png) 
+
+Podemos ver el resultado final este sería el  panel centraliza los indicadores críticos de la infraestructura
+
+Monitorización de Procesamiento 
+Monitorización de Almacenamiento
+
+![Figura 33(/img/sprint1/0-diagrama-logico.png) 
+
+### T17 - Desarrollar script despliegue continuo
+
+Crear deploy.sh que sincronice archivos web vía rsync/git pull, reinicie servicios solo si es necesario, registre log
+
+### Preparar el entorno
+
+Necesitamos una carpeta donde pondrás los archivos nuevos (el "staging") y un archivo de log para auditar
+
+```bash
+# Crear carpeta de trabajo (staging) en tu home
+mkdir -p /home/ec2-user/web-staging
+
+# Crear archivo de log para el despliegue
+sudo touch /var/log/deploy_nexorder.log
+
+# Asegurar permisos (tú eres el dueño para poder escribir)
+sudo chown ec2-user:ec2-user /var/log/deploy_nexorder.log
+```
+![Figura 34(/img/sprint1/0-diagrama-logico.png) 
+
+# Crear el archivo del script
+sudo nano /usr/local/bin/deploy_nexorder.sh
+
+![Figura 35(/img/sprint1/0-diagrama-logico.png) 
+
+# Hacer el script ejecutable
+sudo chmod +x /usr/local/bin/deploy_nexorder.sh
+```
+
+### T17 - Desarrollar script despliegue continuo (VERSIÓN CORREGIDA)
+
+Crear `deploy.sh` que sincronice archivos web vía `rsync`, recargue el servicio `httpd` solo si es necesario, y registre toda la auditoría en log.
+
+### Preparar el entorno
+
+Necesitamos una carpeta "staging" (borrador) y un archivo de log con permisos de escritura.
+
+```bash
+# 1. Crear carpeta de trabajo (staging) en tu home
+mkdir -p /home/ec2-user/web-staging
+
+# 2. Crear archivo de log para el despliegue
+sudo touch /var/log/deploy_nexorder.log
+
+# 3. Asegurar permisos (tú eres el dueño para poder escribir)
+sudo chown ec2-user:ec2-user /var/log/deploy_nexorder.log
+```
+###  Crear el script `deploy_nexorder.sh`
+
+**Hacer el script ejecutable:**
+```bash
+sudo chmod +x /usr/local/bin/deploy_nexorder.sh
+```
+
+###  Simular un despliegue
+Vamos a crear un archivo en `staging` y verificar que el script lo mueve a la web pública.
+
+# Crear un archivo HTML de prueba en staging
+sudo nano /home/ec2-user/web-staging/version2.html
+
+![Figura 36(/img/sprint1/0-diagrama-logico.png) 
+
+# Ejecutar el script de despliegue
+/usr/local/bin/deploy_nexorder.sh
+```
+
+### Verificar resultados
+
+Comprobamos que el archivo llegó a la web y que el log registró todo correctamente.
+
+```bash
+# Verificar que el archivo está en la carpeta pública
+ls -l /var/www/html/version2.html
+
+# Ver el contenido del log de auditoría (últimas líneas)
+tail -10 /var/log/deploy_nexorder.log
+
+![Figura 37(/img/sprint1/0-diagrama-logico.png) 
+
+# 3. Probar acceso vía web (HTTP redirige a HTTPS)
+curl -I http://localhost/version2.html
+
+# 4. Probar acceso directo HTTPS (-k para ignorar certificado autofirmado)
+curl -k https://localhost/version2.html
+
+![Figura 37(/img/sprint1/0-diagrama-logico.png) 
+```
+### 📘 Justificación Técnica ASIXc
+
+Se ha implementado un script de despliegue continuo (`deploy_nexorder.sh`) que automatiza la sincronización de archivos web mediante `rsync` con modo espejo (`--delete`), garantizando que el entorno de producción refleje exactamente el staging. El script ejecuta `rsync` con privilegios elevados (`sudo`) para gestionar permisos en `/var/www/html`, propiedad del usuario `apache`. Incluye validación estricta de códigos de salida: el servicio `httpd` (nombre correcto en Amazon Linux 2023) solo se recarga (`systemctl reload`) si la transferencia fue exitosa, aplicando el principio de fallo seguro. Toda la ejecución queda registrada con timestamp en `/var/log/deploy_nexorder.log` para auditoría y trazabilidad.
+
+### Tarea: T18 - Prueba restauración backup
+
+Simular caída BD, restaurar desde dump comprimido, verificar integridad datos y tiempo recuperación
+# T18 - Prueba restauración backup
+Anotar hora inicio y verificar backup
+
+# Ver hora actual 
+date
+# Verificar backup disponible
+ls -lh /backups/*.sql.gz
+# Crear informe simple con nano
+nano ~/restore_test.md
+```
+![Figura 38(/img/sprint1/0-diagrama-logico.png) 
+
+Escribe dentro (sin EOF, solo texto):
+```
+# Informe Restauración - NexOrder
+Fecha: (pon fecha)
+Backup usado: (nombre del archivo .sql.gz)
+Hora inicio: (la que anotaste con date)
+
+## Pasos:
+1. Verificar backup
+2. DROP DATABASE nexorder_db
+3. Restaurar con gunzip + mysql
+4. Verificar datos
+5. Calcular RTO
+
+
+## Resultado:
+(pendiente)
+
+![Figura 39(/img/sprint1/0-diagrama-logico.png) 
+
+## Simular caída 
+
+```bash
+# Conectar a MySQL como admin
+mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u admin -p
+```
+figura 40
+Dentro de MySQL ejecuta línea por línea:
+```sql
+-- Verificar que existe
+SHOW DATABASES LIKE 'nexorder_db';
+
+-- Usar la BD
+USE nexorder_db;
+
+-- Ver tablas actuales
+SHOW TABLES;
+
+-- SIMULAR CAÍDA: Borrar BD
+DROP DATABASE nexorder_db;
+
+-- Verificar que ya no existe
+SHOW DATABASES LIKE 'nexorder_db';
+
+-- Salir
+EXIT;
+figura 41
+
+ El último `SHOW DATABASES` debe devolver vacío (0 filas).
+
+---
+
+## Restaurar desde backup
+
+```bash
+# Ver el backup más reciente
+ls -t /backups/*.sql.gz | head -1
+
+# Restaurar (reemplaza con TU archivo real)
+gunzip -c /backups/nexorder_db_20260512_140001.sql.gz \
+  | grep -v "SET @@SESSION.SQL_LOG_BIN" \
+  | grep -v "SET @@GLOBAL" \
+  | mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u admin -p nexorder_db
+
+![Figura 42(/img/sprint1/0-diagrama-logico.png) 
+
+```
+> Introduce la contraseña de `admin` cuando la pida.
+
+ Si no muestra errores, la restauración fue exitosa.
+
+---
+
+## Paso 4: Verificar integridad de datos
+
+```bash
+# Conectar de nuevo a MySQL
+mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u admin -p
+```
+
+Dentro de MySQL:
+```sql
+-- Seleccionar BD restaurada
+USE nexorder_db;
+
+-- Verificar tablas
+SHOW TABLES;
+
+-- Contar registros
+SELECT COUNT(*) as productos FROM productos;
+SELECT COUNT(*) as usuarios FROM usuarios;
+SELECT COUNT(*) as estados FROM estados;
+
+-- Ver datos reales
+SELECT nombre, precio FROM productos LIMIT 3;
+
+-- Salir
+EXIT;
+```
+![Figura 43(/img/sprint1/0-diagrama-logico.png) 
+
+## Paso 5: Calcular RTO y finalizar informe
+
+```bash
+# 1. Anotar hora final
+date
+![Figura 44(/img/sprint1/0-diagrama-logico.png) 
+
+# 2. Calcular RTO manualmente:
+RTO = Hora fin - Hora inicio
+RTO = 15:06:28 - 14:42:27
+
+Desglose:
+  15:06:28
+- 14:42:27
+----------
+   0:24:01  → 24 minutos y 1 segundo
+
+
+# 3. Editar informe con nano
+nano ~/restore_test.md
+```
+
+Actualiza con datos reales:
+```
+# Informe Restauración - NexOrder
+Fecha: 2026-05-12
+Backup usado: nexorder_db_20260512_140001.sql.gz
+
+## Tiempos de recuperación
+Hora inicio: 14:42:27
+Hora fin: 15:06:28
+RTO: 24 minutos y 1 segundo
+
+## Pasos ejecutados:
+1. Verificar backup disponible en /backups/
+2. Crear BD: CREATE DATABASE nexorder_db
+3. Restaurar: gunzip -c backup.sql.gz | grep -v "SET @@" | mysql -h endpoint -u admin -p nexorder_db
+4. Verificar: SHOW TABLES + SELECT COUNT(*)
+5. Confirmar integridad de datos (5 tablas, datos íntegros)
+
+## Resultado:
+Restauración exitosa. BD operativa con 5 tablas y datos íntegros.
+RTO de 24min 01s cumple requisitos del proyecto ASIXc
+
+![Figura 45(/img/sprint1/0-diagrama-logico.png) 
+
+Use el nmap  para comprobar qué puerto está abierto pudiendo obtener esta información
+ Descubrimiento de Puertos:El programa ya ha encontrado el puerto 22/tcp (SSH) y el puerto 80/tcp (HTTP) abierto
+Progreso del escaneo Esto significa que no solo sabe que el puerto 80 está abierto si no que esta preguntando que version es
+Detección de latencia:Podemos ver que  servidor responde muy rápido lo que indica que la conexión entre tu Kali y el servidor AWS es estable
+
+![Figura 46(/img/sprint1/0-diagrama-logico.png) 
+
+
+
+
+
+
