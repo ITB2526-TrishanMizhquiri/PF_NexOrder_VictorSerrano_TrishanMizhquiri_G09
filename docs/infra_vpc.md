@@ -290,9 +290,6 @@ El `connection id 39` confirma que la comunicación entre EC2 y RDS funciona cor
 ![Figura 16](/img/sprint1/16-mysql-connection.png) 
 > 📸 **Figura 16 – Conexión MySQL exitosa:** `connection id 39` desde EC2 hacia el endpoint RDS
 
-![Figura 17](/img/sprint1/17-mysql-prompt.png) 
-> 📸 **Figura 17 – Prompt mysql> activo:** confirmando acceso a MySQL 8.0.40
-
 ---
 
 ## 5. TA04: Security Groups
