@@ -1,577 +1,792 @@
-# Documentación Técnica – Infraestructura VPC Sprint 3
+# Documentación Técnica – Monitorización, Backups y Resiliencia Sprint 3
 
 **Proyecto:** NexOrder Infrastructure
 
-**Responsables:** Victor Serrano, Trishan Mizhquiri
+**Autores:** Victor Serrano & Trishan Mizhquiri
 
-**Fecha:** 4 de mayo 2026 – 12 de mayo 2026
+**Fecha:** 27 de abril 2026 – 3 de mayo 2026
 
-**Módulos:** M0370 (Planificación de redes) · M0369 (Integración de ordenadores en red)
+**Módulos:** M0374 (Automatización) · M0377 (Backups) · M0378 (Auditoría) · C037 (Seguridad)
 
 ---
 
 ## 📋 Índice
 
-1. [Arquitectura de Red](#1-arquitectura-de-red)
-2. [TA01: VPC y Subredes](#2-ta01-vpc-y-subredes)
-   - [2.1 Creación de la VPC](#21-creación-de-la-vpc)
-   - [2.2 Subred Pública](#22-subred-pública)
-   - [2.3 Subred Privada](#23-subred-privada)
-   - [2.4 Validación de Subredes](#24-validación-de-subredes)
-3. [TA02: Internet Gateway y Enrutamiento](#3-ta02-internet-gateway-y-enrutamiento)
-   - [3.1 Internet Gateway (IGW)](#31-internet-gateway-igw)
-   - [3.2 Tablas de Enrutamiento](#32-tablas-de-enrutamiento)
-4. [TA03: Instancias EC2 y RDS](#4-ta03-instancias-ec2-y-rds)
-   - [4.1 Instancia EC2](#41-instancia-ec2)
-   - [4.2 Instancia RDS MySQL](#42-instancia-rds-mysql)
-   - [4.3 Conexión SSH Inicial](#43-conexión-ssh-inicial)
-   - [4.4 Prueba EC2 → RDS](#44-prueba-de-conexión-ec2--rds)
-5. [TA04: Security Groups](#5-ta04-security-groups)
-   - [5.1 SG-Web-NexOrder](#51-sg-web-nexorder)
-   - [5.2 SG-DB-NexOrder](#52-sg-db-nexorder)
-6. [TA05: Hardening del Sistema](#6-ta05-hardening-del-sistema)
-   - [6.1 Actualización de Paquetes](#61-actualización-de-paquetes)
-   - [6.2 Usuario Administrativo Restringido](#62-usuario-administrativo-restringido)
-   - [6.3 Hardening de SSH](#63-hardening-de-ssh)
-   - [6.4 Reinicio y Validación](#64-reinicio-y-validación-del-servicio)
-   - [6.5 Prueba con nexadmin](#65-prueba-con-usuario-nexadmin)
-7. [Verificación Final de Conectividad](#7-verificación-final-de-conectividad)
-8. [Justificación de Criterios](#8-justificación-de-criterios)
+1. [Arquitectura de Monitorización y Resiliencia](#1-arquitectura-de-monitorización-y-resiliencia)
+2. [T13: Script de Backup Automatizado](#2-t13-script-de-backup-automatizado)
+   - [2.1 Preparación del Entorno](#21-preparación-del-entorno)
+   - [2.2 Creación del Script](#22-creación-del-script)
+   - [2.3 Prueba Manual](#23-prueba-manual)
+3. [T14: Programación con Cron](#3-t14-programación-con-cron)
+   - [3.1 Verificación de Permisos](#31-verificación-de-permisos)
+   - [3.2 Instalación y Activación de Cronie](#32-instalación-y-activación-de-cronie)
+   - [3.3 Configuración del Crontab](#33-configuración-del-crontab)
+   - [3.4 Verificación y Prueba](#34-verificación-y-prueba)
+4. [T15: Rotación de Logs con Logrotate](#4-t15-rotación-de-logs-con-logrotate)
+   - [4.1 Configuración para Apache (httpd)](#41-configuración-para-apache-httpd)
+   - [4.2 Configuración para MySQL](#42-configuración-para-mysql)
+5. [T16: CloudWatch y Alertas Proactivas](#5-t16-cloudwatch-y-alertas-proactivas)
+   - [5.1 Acceso a CloudWatch](#51-acceso-a-cloudwatch)
+   - [5.2 Creación de Alarma CPU](#52-creación-de-alarma-cpu)
+   - [5.3 Configuración de Acciones SNS](#53-configuración-de-acciones-sns)
+   - [5.4 Dashboard Personalizado y Métricas EBS](#54-dashboard-personalizado-y-métricas-ebs)
+6. [T17: Script de Despliegue Continuo](#6-t17-script-de-despliegue-continuo)
+   - [6.1 Preparación del Entorno](#61-preparación-del-entorno)
+   - [6.2 Creación del Script](#62-creación-del-script)
+   - [6.3 Simulación y Validación](#63-simulación-y-validación)
+7. [T18: Prueba de Restauración y RTO](#7-t18-prueba-de-restauración-y-rto)
+   - [7.1 Verificación del Backup Disponible](#71-verificación-del-backup-disponible)
+   - [7.2 Simulación de Caída (DROP DATABASE)](#72-simulación-de-caída-drop-database)
+   - [7.3 Restauración desde Backup](#73-restauración-desde-backup)
+   - [7.4 Verificación de Integridad](#74-verificación-de-integridad)
+   - [7.5 Cálculo del RTO](#75-cálculo-del-rto)
+8. [T19: Auditoría de Seguridad con nmap](#8-t19-auditoría-de-seguridad-con-nmap)
+9. [Justificación de Criterios](#9-justificación-de-criterios)
 
 ---
 
-## T13. Desarrollar script backup automatizado
+## 1. Arquitectura de Monitorización y Resiliencia
 
-Descripción: Crear backup.sh que ejecute mysqldump, comprima gzip, añada timestamp y almacene en /backups local.
+El Sprint 3 añade la **capa de operaciones** sobre la infraestructura y servicios de los sprints anteriores. Se implementan cinco pilares de resiliencia que garantizan la continuidad del negocio:
 
-## Preparar entorno y permisos
+![Arquitectura de Monitorización y Resiliencia](/img/sprint3/0-arquitectura.png)
+> 📸 **Figura 0 – Arquitectura de operaciones:** diagrama conceptual de los flujos de monitorización y resiliencia (ver sección [Leyenda de Imágenes](#10-leyenda-de-imágenes))
+
+---
+
+## 2. T13: Script de Backup Automatizado
+
+El objetivo es crear un sistema de backup lógico completamente automatizado que exporte la base de datos MySQL, la comprima, la versione con timestamp y gestione la retención automáticamente.
+
+### 2.1 Preparación del Entorno
+
+Antes de crear el script se preparan los directorios y permisos con un criterio de mínimo privilegio:
 
 ```bash
-# 1. Crear directorio de backups y log
+# 1. Crear el directorio donde se almacenarán los backups
 sudo mkdir -p /backups
+
+# 2. Crear el archivo de log de auditoría
 sudo touch /var/log/nexorder_backup.log
 
-# 2. Asignar propietario al usuario actual (ec2-user) para facilitar gestión
+# 3. Asignar propietario al usuario operativo (ec2-user)
 sudo chown -R ec2-user:ec2-user /backups /var/log/nexorder_backup.log
 
-# 3. Permisos seguros (solo el propietario puede leer/escribir)
+# 4. Permisos seguros: solo el propietario puede leer/escribir
 chmod 700 /backups
 chmod 600 /var/log/nexorder_backup.log
----
-![Figura 0](/img/sprint1/0-diagrama-logico.png) 
+```
 
-##  Paso 2: Crear el script `backup_nexorder.sh`
+**Justificación de permisos:**
+
+| Recurso | Permiso | Razón |
+|---------|---------|-------|
+| `/backups` | `700` | Nadie más que `ec2-user` puede listar ni acceder a los backups (contienen datos sensibles) |
+| `nexorder_backup.log` | `600` | El log incluye mensajes con nombres de BD; solo el propietario debe leerlo |
+
+![Preparación permisos backup](/img/sprint3/1-backup-env-setup.png)
+> 📸 **Figura 1** – Terminal ejecutando los cinco comandos de preparación: `mkdir /backups`, `touch nexorder_backup.log`, `chown ec2-user`, `chmod 700` y `chmod 600`
+
+---
+
+### 2.2 Creación del Script
+
+El script se coloca en `/usr/local/bin/` siguiendo la convención POSIX para ejecutables de administración:
 
 ```bash
-# Crear el script en ruta estándar para administradores
 sudo nano /usr/local/bin/backup_nexorder.sh
+```
 
-![Figura 1](/img/sprint1/0-diagrama-logico.png) 
-> 📸 **Figura 0 – Arquitectura lógica:** diagrama conceptual de la red
+Contenido completo del script:
 
----
+[Enllaç al documento: backup_nexorder.sh](/docs/src/backup_nexorder.sh)
+
+```bash
 # Hacer el script ejecutable
 sudo chmod +x /usr/local/bin/backup_nexorder.sh
 ```
 
-> ⚠️ **IMPORTANTE:** Antes de ejecutar, edita las líneas `DB_HOST`, `DB_PASS` y `DB_USER` con tus datos reales:
-> ```bash
-> sudo nano /usr/local/bin/backup_nexorder.sh
-> ```
-![Figura 2](/img/sprint1/0-diagrama-logico.png) 
+**Decisiones de diseño del script:**
 
+- **Pipeline `mysqldump | gzip`**: evita escribir el SQL sin comprimir a disco. El archivo `.gz` ocupa entre 5 y 10 veces menos espacio.
+- **`$?` tras el pipe**: verifica el código de salida del último comando. Si `mysqldump` falla, `gzip` recibirá stdin vacío y también fallará, propagando el error.
+- **`find -mtime +7 -delete`**: implementa una política de retención de 7 días sin intervención manual.
+- **Timestamps en log**: cada línea incluye fecha y hora exactas, creando una traza de auditoría completa.
 
-## Ejecutar prueba manual
+![Script backup_nexorder.sh en nano](/img/sprint3/2-backup-script-nano.png)
+> 📸 **Figura 2** – Editor nano con el contenido completo de `backup_nexorder.sh` mostrando configuración, pipeline `mysqldump | gzip` y bloque `if [ $? -eq 0 ]`
 
-```bash
-# Ejecutar el script
-/usr/local/bin/backup_nexorder.sh
-
-# Verificar archivo generado
-ls -lh /backups/
-
-# Verificar log de auditoría
-tail -5 /var/log/nexorder_backup.log
-```
-![Figura 3](/img/sprint1/0-diagrama-logico.png) 
-
-##  Justificación Técnica ASIXc
- *"Se ha desarrollado un script Bash (`backup_nexorder.sh`) que automatiza la exportación lógica de la base de datos MySQL mediante `mysqldump`, aplicando compresión `gzip` para optimizar espacio y añadiendo un timestamp para versionado. El script incluye control de errores (`$?`), registro de auditoría en `/var/log/` y política de retención de 7 días mediante `find -mtime`.
-
-## T14. - Configurar cron ejecución programada
-Descripción: Programar tarea cron diaria 03:00, verificar permisos y redirigir salida a log auditoría.
-## 🔧 Paso 1: Verificar permisos del log
-
-Antes de configurar cron, asegúrate de que el usuario pueda escribir en el log:
-
-```bash
-# Verificar propietario y permisos actuales
-ls -l /var/log/nexorder_backup.log
-
-# Si es necesario, ajustar permisos (el usuario del cron debe poder escribir)
-sudo chown ec2-user:ec2-user /var/log/nexorder_backup.log
-sudo chmod 664 /var/log/nexorder_backup.log
-```
-![Figura 3](/img/sprint1/0-diagrama-logico.png) 
- El archivo debe ser writable por `ec2-user`.
+![chmod +x del script](/img/sprint3/3-backup-chmod.png)
+> 📸 **Figura 3** – `sudo nano /usr/local/bin/backup_nexorder.sh` y `sudo chmod +x` del script
 
 ---
 
-## Pasos para instalar y activar CRON
+### 2.3 Prueba Manual
 
-### Instalar el paquete correcto
 ```bash
-sudo dnf install cronie -y
+# Ejecutar el script manualmente
+/usr/local/bin/backup_nexorder.sh
+
+# Verificar el archivo generado
+ls -lh /backups/
+
+# Verificar el log de auditoría
+tail -5 /var/log/nexorder_backup.log
 ```
-![Figura 5](/img/sprint1/0-diagrama-logico.png) 
-### Habilitar e iniciar el servicio
-```bash
-# Habilitar para que arranque con el sistema
-sudo systemctl enable crond
 
-# Iniciar el servicio ahora
+**Resultado en `/backups/`:**
+```
+total 4.0K
+-rw-r--r--. 1 ec2-user ec2-user 2.4K May 10 14:47 nexorder_db_20260510_144738.sql.gz
+```
+
+**Resultado en el log:**
+```
+[2026-05-10 14:47:38] [ÉXITO] Backup creado: nexorder_db_20260510_144738.sql.gz (4.0K)
+[2026-05-10 14:47:38] [INFO] Limpieza de backups antiguos completada.
+```
+
+Las advertencias de `mysqldump` sobre GTIDs son normales en RDS gestionado y no afectan a la integridad del backup.
+
+![Prueba manual del backup](/img/sprint3/4-backup-manual-test.png)
+> 📸 **Figura 4** – `ls -lh /backups/` mostrando el `.sql.gz` generado + `tail -5 nexorder_backup.log` con entradas `[ÉXITO]` y `[INFO] Limpieza`
+
+---
+
+## 3. T14: Programación con Cron
+
+El objetivo es automatizar la ejecución del script de backup diariamente a las 03:00 AM, horario de mínima actividad del sistema.
+
+### 3.1 Verificación de Permisos
+
+Antes de configurar cron, se asegura que `ec2-user` puede escribir en el log:
+
+```bash
+# Verificar permisos actuales
+ls -l /var/log/nexorder_backup.log
+
+# Ajustar para que cron pueda escribir
+sudo chown ec2-user:ec2-user /var/log/nexorder_backup.log
+sudo chmod 664 /var/log/nexorder_backup.log
+```
+
+![Verificación y ajuste de permisos del log](/img/sprint3/05-cron-log-permissions.png)
+> 📸 **Figura 5** – `ls -l` mostrando el log antes (`-rw-------`) y después (`-rw-rw-r--`) del ajuste de permisos con `chmod 664`
+
+---
+
+### 3.2 Instalación y Activación de Cronie
+
+Amazon Linux 2023 no incluye `crond` por defecto; se instala el paquete `cronie`:
+
+```bash
+# Instalar el demonio cron
+sudo dnf install cronie -y
+
+# Habilitar para arranque automático e iniciar inmediatamente
+sudo systemctl enable crond
 sudo systemctl start crond
 
-# Verificar estado
-sudo systemctl status crond 
+# Verificar que el servicio está activo
+sudo systemctl status crond
 ```
-![Figura 6](/img/sprint1/0-diagrama-logico.png) 
 
-## Editar crontab
+**Versiones instaladas:** `cronie 1.5.7-1.amzn2023.0.2` y `cronie-anacron 1.5.7-1.amzn2023.0.2`
+
+![Instalación de cronie](/img/sprint3/06-cronie-install.png)
+> 📸 **Figura 6** – `sudo dnf install cronie -y` instalando `cronie 1.5.7` y `cronie-anacron 1.5.7`
+
+![Estado del servicio crond](/img/sprint3/07-crond-status.png)
+> 📸 **Figura 7** – `systemctl status crond` mostrando `active (running)` con PID 2562, con mensajes de inicio `CRON STARTUP (1.5.7)` e `inotify support`
+
+---
+
+### 3.3 Configuración del Crontab
 
 ```bash
-# Editar la tabla cron del usuario actual (ec2-user)
+# Editar el crontab del usuario actual (ec2-user)
 crontab -e
 ```
-## Añadir la tarea programada
 
-Pega esta línea **al final del archivo**:
+Línea añadida al final del archivo:
 
 ```cron
 # Backup diario NexOrder - 03:00 AM (T14)
 0 3 * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1
 ```
-![Figura 7](/img/sprint1/0-diagrama-logico.png) 
-![Figura 8(/img/sprint1/0-diagrama-logico.png) 
 
-## Guardar y verificar
+**Explicación del formato cron:**
 
-**Guardar el archivo:**
-**Verificar que se guardó correctamente:**
+```
+┌─ minuto (0-59)   → 0  (minuto 0, en punto)
+│ ┌─ hora (0-23)   → 3  (03:00 AM)
+│ │ ┌─ día mes     → *  (todos los días)
+│ │ │ ┌─ mes       → *  (todos los meses)
+│ │ │ │ ┌─ día sem → *  (todos los días de la semana)
+│ │ │ │ │
+0 3 * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1
+```
+
+**¿Por qué estas opciones?**
+
+| Elemento | Valor | Razón |
+|----------|-------|-------|
+| `0 3 * * *` | 03:00 AM diario | Hora de mínima actividad; minimiza impacto en rendimiento |
+| Ruta absoluta | `/usr/local/bin/...` | Cron no hereda el `$PATH` del usuario; las rutas relativas fallan |
+| `>> log` | Append al log | Acumula historial sin sobreescribir registros anteriores |
+| `2>&1` | Redirigir stderr a stdout | Captura tanto salida normal como errores en el mismo log |
+
+![Crontab con tarea instalada](/img/sprint3/08-crontab-edit.png)
+> 📸 **Figura 8** – Editor crontab con el mensaje `installing new crontab` y la línea `0 3 * * *` añadida
+
+![Crontab modo prueba cada minuto](/img/sprint3/09-crontab-test-mode.png)
+> 📸 **Figura 9** – Editor crontab mostrando la versión de prueba `* * * * *` (cada minuto) junto a la definitiva `0 3 * * *`
+
+---
+
+### 3.4 Verificación y Prueba
+
 ```bash
-# Listar tareas cron del usuario actual
+# Verificar que el crontab se guardó correctamente
 crontab -l
 ```
-![Figura 9(/img/sprint1/0-diagrama-logico.png) 
 
-## Prueba inmediata (recomendada)
-
-Para no esperar hasta las 03:00 AM, puedes probar el cron ejecutándolo manualmente o modificando temporalmente el horario:
-
-### Opción A: Ejecutar manualmente (más seguro)
-```bash
-# Ejecutar el script ahora mismo para probar
-/usr/local/bin/backup_nexorder.sh
-
-# Verificar que se generó un nuevo backup y se escribió en el log
-ls -lh /backups/ | tail -1
-tail -3 /var/log/nexorder_backup.log
+**Resultado:**
 ```
-### Opción B: Probar con cron cada minuto (solo para pruebas)
-```bash
-# 1. Editar crontab temporalmente
-crontab -e
-
-# 2. Cambiar la línea a (ejecutar cada minuto):
-* * * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1
-
-# 3. Guardar y esperar 1-2 minutos
-
-# 4. Verificar el log
-tail -5 /var/log/nexorder_backup.log
-
-# 5. Restaurar el horario original (03:00)
-crontab -e
-# Cambiar: * * * * *  →  0 3 * * *
+0 3 * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1
 ```
-![Figura 10(/img/sprint1/0-diagrama-logico.png) 
-![Figura 11(/img/sprint1/0-diagrama-logico.png) 
 
-"Se ha configurado una tarea cron (`0 3 * * *`) para ejecutar el script de backup diariamente a las 03:00, horario de baja actividad que minimiza el impacto en el rendimiento del sistema. La salida del script se redirige a `/var/log/nexorder_backup.log` con `2>&1` para capturar tanto stdout como stderr, garantizando auditoría completa de cada ejecución. Los permisos `664` en el log permiten escritura por el usuario del cron mientras mantienen lectura para administración y revisión. El script utiliza rutas absolutas para evitar fallos en entornos no interactivos de cron.
+Para validar sin esperar a las 03:00 AM, se ejecutó temporalmente con `* * * * *` (cada minuto), generando múltiples backups que confirman el funcionamiento correcto.
 
-### T15: Implementar rotación de logs (logrotate)
-Añadimos en el archivo sudo nano /etc/logrotate.d/httpd  y eliminamos el que había ya que si no va a salir un error de entrada duplicada 
+![crontab -l con tarea verificada](/img/sprint3/10-crontab-verify.png)
+> 📸 **Figura 10** – `crontab -l` mostrando `0 3 * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1`
 
-![Figura 12(/img/sprint1/0-diagrama-logico.png) 
-![Figura 13(/img/sprint1/0-diagrama-logico.png) 
+![Listado de backups generados por cron](/img/sprint3/11-backups-listing.png)
+> 📸 **Figura 11** – `ls -lh /backups/` con 6 archivos `.sql.gz` timestamped generados durante la prueba con `* * * * *`
 
-Haciendo lo anterior lo que hacemos que es que los log se cortan cada dia y guardamos solo los últimos 7 días y los comprimimos para ahorrar espacio 
-Podemos ver que:
+---
 
-No hay errores críticos en la configuración del servidor
-Has implementado la automatización necesaria para que el disco duro de la instancia EC2 no se llene con archivos de texto infinitos
-Mantener la integridad de los datos al asegurar que siempre habrá 7 días de historial disponibles para auditorías de seguridad
-eso quiere decir que el servidor es "inteligente” y se mantiene limpio a sí mismo de forma automática
+## 4. T15: Rotación de Logs con Logrotate
 
-![Figura 14(/img/sprint1/0-diagrama-logico.png) 
+Sin rotación de logs, los archivos de Apache y MySQL crecen indefinidamente hasta llenar el disco. `logrotate` automatiza el corte, compresión y eliminación de registros antiguos.
 
-Hemos usado el sudo nano /etc/logrotate.d/mysql para crear una regla 
-![Figura 14(/img/sprint1/0-diagrama-logico.png) 
-![Figura 15(/img/sprint1/0-diagrama-logico.png) 
+### 4.1 Configuración para Apache (httpd)
 
-### T16: Configurar CloudWatch y alertas proactivas
-Accedemos a la consola de AWS y localizamos el servicio CloudWatch
-![Figura 16(/img/sprint1/0-diagrama-logico.png) 
-
-Una vez dentro de CloudWatch, nos situamos en la sección de Métricas. Aquí es donde el sistema empieza a recolectar los datos brutos del servidor
-
-![Figura 17(/img/sprint1/0-diagrama-logico.png) 
-
-Finalmente, accedemos al apartado de Alarmas. Aquí es donde convertimos la monitorización pasiva en proactiva. Al pulsar en 'Crear alarma'
-
-![Figura 18(/img/sprint1/0-diagrama-logico.png) 
-
-Se ha seleccionado la métrica específica CPUUtilization vinculada directamente a nuestra instancia de servidor web Como se observa en el gráfico de líneas, el sistema ya está monitorizando y mostrando la carga de trabajo en tiempo real
-
-![Figura 19(/img/sprint1/0-diagrama-logico.png) 
-
-Se ha establecido un periodo de 1 minuto. Esto significa que la métrica se evalúa en intervalos cortos para asegurar una capacidad de respuesta rápida ante cualquier anomalía
-Establecimiento de Condiciones:
-
-Tipo de límite: utiliza un umbral Estático, que es el más fiable
-Umbral Crítico: se ha configurado la alarma para que se dispare cuando la utilización de la CPU sea Mayor a 80
-
-Lógica de activación:Si el valor medio de la CPU supera este 80% durante el periodo de un minuto, el estado de la alarma pasará de "OK" a "En Alarma", activando inmediatamente el protocolo de notificación SNS configurado
-
-![Figura 20(/img/sprint1/0-diagrama-logico.png) 
-
-Una vez definida la métrica, el siguiente paso crítico es establecer qué acción debe realizar el sistema cuando se detecte un problema
-
-Configuración de Acciones:Se ha configurado un activador para que, cuando la alarma pase al estado "En modo alarma" se envíe una notificación de forma automática
-
-Para ello se ha seleccionado un tema de Amazon SNS existente denominado Este paso garantiza que el sistema no solo monitorice en silencio, sino que sea capaz de alertar activamente a los administradores
-
-![Figura 21(/img/sprint1/0-diagrama-logico.png) 
-
-Como medida de seguridad y validación, Amazon SNS requiere una confirmación  podemos ver que ha confirmada la suscripción 
-
-![Figura 22(/img/sprint1/0-diagrama-logico.png) 
-
-procedemos a identificar la alarma para facilitar su gestión y reconocimiento dentro del panel de AWS
-Nombre de la Alarma:Alarma_CPU_NexOrder_Serrano
-
-![Figura 23(/img/sprint1/0-diagrama-logico.png) 
-
-Podemos ver una vista previa de la configuración
-Métrica y Condiciones Confirmación del umbral estático de 80% de CPU evaluado cada 1 minuto
-Acciones de Notificación:Verificación de que la alerta está correctamente vinculada al tema SNS para el envío de correos
-Detalles Identificativos:Revisión del nombre y la descripción personalizada
-
-![Figura 24(/img/sprint1/0-diagrama-logico.png) 
-
-Confirmación de Despliegue
-
-![Figura 25(/img/sprint1/0-diagrama-logico.png) 
-
-Creamos un panel y le colocamos el siguiente nombre
-
-![Figura 26(/img/sprint1/0-diagrama-logico.png) 
-
-
-Hemos  configurado un Dashboard personalizado en CloudWatch utilizamos  widgets de tipo Línea que nos permite visualizar en tiempo real la carga de lectura y escritura en el disco duro de la instancia
-
-![Figura 27(/img/sprint1/0-diagrama-logico.png) 
-
-Hemos  configurado un Dashboard personalizado en CloudWatch utilizamos  widgets de tipo Línea que nos permite visualizar en tiempo real la carga de lectura y escritura en el disco duro de la instancia
-
-![Figura 28(/img/sprint1/0-diagrama-logico.png) 
-
-Veremos esta tabla que se trata del Selector de Métricas de CloudWatch y es la herramienta que te permite ver entre todos los datos que genera tu servidor para elegir cuáles quieres vigilar
-Hemos seleccionado CPUUtilization por ser el KPI (Indicador Clave de Desempeño) más crítico de la infraestructura.
-
-![Figura 29(/img/sprint1/0-diagrama-logico.png) 
-
-hemos usado widget de tipo Número ya que widget de número permite conocer el valor exacto y actual de un solo vistazo
-
-![Figura 30(/img/sprint1/0-diagrama-logico.png) 
-
-Seleccionamos el apartado "EBS" para acceder  a los indicadores de rendimiento de los discos duros virtuales 
-
-![Figura 31(/img/sprint1/0-diagrama-logico.png) 
-
-Configuración de Métricas de Disco y como podemos ver en tabla, marcamos las opciones VolumeReadBytes y VolumeWriteBytes ya que  nos permite controlar cuánta información se lee y se escribe en el disco de la base de datos
-
-![Figura 32(/img/sprint1/0-diagrama-logico.png) 
-
-Podemos ver el resultado final este sería el  panel centraliza los indicadores críticos de la infraestructura
-
-Monitorización de Procesamiento 
-Monitorización de Almacenamiento
-
-![Figura 33(/img/sprint1/0-diagrama-logico.png) 
-
-### T17 - Desarrollar script despliegue continuo
-
-Crear deploy.sh que sincronice archivos web vía rsync/git pull, reinicie servicios solo si es necesario, registre log
-
-### Preparar el entorno
-
-Necesitamos una carpeta donde pondrás los archivos nuevos (el "staging") y un archivo de log para auditar
+Se edita el archivo existente (eliminando duplicados para evitar error `duplicate log entry`):
 
 ```bash
-# Crear carpeta de trabajo (staging) en tu home
+sudo nano /etc/logrotate.d/httpd
+```
+
+Contenido aplicado:
+
+```text
+/var/log/httpd/*log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+    sharedscripts
+    postrotate
+        /bin/systemctl reload httpd.service > /dev/null 2>/dev/null || true
+    endscript
+}
+```
+
+**Explicación de cada directiva:**
+
+| Directiva | Función |
+|-----------|---------|
+| `daily` | Rota los logs cada día |
+| `rotate 7` | Conserva los últimos 7 archivos rotados (7 días de historial) |
+| `compress` | Comprime los archivos rotados con gzip, ahorrando espacio |
+| `missingok` | No falla si el archivo de log no existe |
+| `notifempty` | No rota si el archivo está vacío |
+| `sharedscripts` | Ejecuta `postrotate` una sola vez aunque haya varios archivos coincidentes |
+| `postrotate reload` | Envía señal a Apache para abrir nuevos descriptores sin reiniciar el servicio |
+
+El `postrotate` es crítico: sin él, Apache seguiría escribiendo en el archivo antiguo (ya renombrado por logrotate) porque mantiene el descriptor de fichero abierto.
+
+![Apertura de /etc/logrotate.d/httpd](/img/sprint3/12-logrotate-httpd-open.png)
+> 📸 **Figura 12** – Terminal con `sudo nano /etc/logrotate.d/httpd` abriendo el archivo de configuración
+
+![Contenido logrotate httpd en nano](/img/sprint3/13-logrotate-httpd-content.png)
+> 📸 **Figura 13** – Editor nano con el bloque completo de logrotate para `/var/log/httpd/*log` incluyendo `postrotate` con `systemctl reload`
+
+![Validación logrotate httpd en modo debug](/img/sprint3/14-logrotate-httpd-debug.png)
+> 📸 **Figura 14** – Salida de `sudo logrotate -d /etc/logrotate.d/httpd` mostrando `rotating log /var/log/httpd/access_log after 1 days (7 rotations)` sin errores
+
+---
+
+### 4.2 Configuración para MySQL
+
+```bash
+sudo nano /etc/logrotate.d/mysql
+```
+
+Contenido:
+
+```text
+/var/log/mysqld.log {
+    daily
+    rotate 7
+    copytruncate
+    missingok
+    compress
+    notifempty
+}
+```
+
+**¿Por qué `copytruncate` en lugar de `postrotate`?** MySQL mantiene el archivo de log abierto con un descriptor bloqueado. Con `copytruncate`, logrotate primero copia el contenido al archivo rotado y luego trunca el original a 0 bytes, sin necesidad de enviar señales al proceso MySQL (que en RDS no es accesible directamente).
+
+![Apertura de /etc/logrotate.d/mysql](/img/sprint3/15-logrotate-mysql-open.png)
+> 📸 **Figura 15** – Terminal con `sudo nano /etc/logrotate.d/mysql` abriendo el archivo
+
+![Contenido logrotate mysql y validación debug](/img/sprint3/16-logrotate-mysql-content.png)
+> 📸 **Figura 16** – Editor nano con `/etc/logrotate.d/mysql` mostrando `copytruncate` y el bloque completo + salida de `logrotate -d` en modo debug
+
+---
+
+## 5. T16: CloudWatch y Alertas Proactivas
+
+CloudWatch transforma la monitorización de reactiva (revisar el servidor cuando algo falla) a proactiva (recibir alertas antes de que el problema afecte a los usuarios).
+
+### 5.1 Acceso a CloudWatch
+
+Se accede a la consola AWS → búsqueda del servicio → CloudWatch. La página de Overview muestra el estado inicial sin alarmas ni paneles configurados.
+
+![Búsqueda de CloudWatch en consola AWS](/img/sprint3/17-cloudwatch-search.png)
+> 📸 **Figura 17** – Navegador con la consola AWS y búsqueda de "CloudWatch", mostrando el resultado `CloudWatch - Monitorice recursos y aplicaciones`
+
+![Overview de CloudWatch](/img/sprint3/18-cloudwatch-overview.png)
+> 📸 **Figura 18** – Página de Overview de CloudWatch con el asistente de configuración inicial y las 4 opciones principales (Crear alarmas, Panel, Registros, Eventos)
+
+---
+
+### 5.2 Creación de Alarma CPU
+
+Se navega a **Alarmas → Crear alarma** y se selecciona la métrica `CPUUtilization` de la instancia EC2.
+
+**Ruta:** `EC2 > Per-Instance Metrics > 09NexOrder-EC2-WEB-09 > CPUUtilization`
+
+Parámetros de la alarma:
+
+| Parámetro | Valor | Razón |
+|-----------|-------|-------|
+| Métrica | `CPUUtilization` | KPI más crítico de un servidor web |
+| Namespace | `AWS/EC2` | Métrica nativa de EC2, sin agente adicional |
+| Instance ID | `i-0959d7cac425606cf` | Específica de `09NexOrder-EC2-WEB-09` |
+| Estadística | Media | Evalúa el valor promedio del período |
+| Período | 1 minuto | Evaluación granular para respuesta rápida |
+| Tipo de límite | Estático | Umbral fijo y predecible |
+| Condición | Mayor que (`>`) `80` | Alerta cuando la CPU supera el 80% |
+
+**Lógica de activación:** si el valor medio de `CPUUtilization` supera el 80% durante un período de 1 minuto, la alarma pasa de `OK` a `En Alarma`, disparando inmediatamente la acción SNS configurada.
+
+![Selector de métricas con CPUUtilization](/img/sprint3/19-cloudwatch-metric-select.png)
+> 📸 **Figura 19** – Selector de métricas CloudWatch con `CPUUtilization` de `09NexOrder-EC2-WEB-09` seleccionado (checkbox marcado) y gráfico de línea visible
+
+![Configuración de condiciones de la alarma](/img/sprint3/20-cloudwatch-alarm-conditions.png)
+> 📸 **Figura 20** – Formulario de condiciones: umbral Estático `> 80`, período 1 minuto, instancia `09NexOrder-EC2-WEB-09`, gráfico con la línea roja en 80%
+
+---
+
+### 5.3 Configuración de Acciones SNS
+
+Una vez definida la métrica y el umbral, se configura la acción automática al saltar la alarma:
+
+- **Activador:** Estado `En modo alarma`
+- **Acción:** Enviar notificación al tema SNS `Default_CloudWatch_Alarms_Topic`
+- **Correo suscrito:** `victor.serrano.7e8@itb.cat`
+
+Amazon SNS requiere confirmación de la suscripción por email como medida de seguridad. Tras confirmar, la suscripción queda activa con ARN:
+`arn:aws:sns:us-east-1:324341945465:Default_CloudWatch_Alarms_Topic:52cc3e53-d32b-40d8-9285-167f14515f4e`
+
+**Nombre de la alarma:** `Alarma_CPU_NexOrder_Serrano`
+**Descripción:** `Aviso cuando la CPU supera el 80%`
+
+![Configurar las acciones SNS](/img/sprint3/21-cloudwatch-sns-action.png)
+> 📸 **Figura 21** – Formulario "Configurar las acciones" con `En modo alarma` seleccionado, tema SNS `Default_CloudWatch_Alarms_Topic` y email `victor.serrano.7e8@itb.cat`
+
+![Confirmación de suscripción SNS](/img/sprint3/22-sns-subscription-confirmed.png)
+> 📸 **Figura 22** – Página AWS SNS con `¡Suscripción confirmada!` y el ARN completo de la suscripción
+
+![Detalles de la alarma - nombre y descripción](/img/sprint3/23-cloudwatch-alarm-details.png)
+> 📸 **Figura 23** – Formulario "Agregar detalles de alarma" con nombre `Alarma_CPU_NexOrder_Serrano` y descripción `Aviso cuando la CPU supera el 80%`
+
+![Vista previa completa de la alarma](/img/sprint3/24-cloudwatch-alarm-preview.png)
+> 📸 **Figura 24** – Página "Ver la vista previa y crear" con los 3 pasos resumidos: métrica CPU, acción SNS y nombre de la alarma antes de confirmar la creación
+
+![Alarma creada correctamente](/img/sprint3/25-cloudwatch-alarm-created.png)
+> 📸 **Figura 25** – Banner verde `Se ha creado correctamente la alarma Alarma_CPU_NexOrder_Serrano` en el listado de alarmas con estado `Datos insuficientes`
+
+---
+
+### 5.4 Dashboard Personalizado y Métricas EBS
+
+Se crea un dashboard centralizado para visualizar en tiempo real los indicadores más importantes:
+
+```
+Nombre del dashboard: Dashboard_NexOrder_Serrano
+```
+
+**Widgets configurados:**
+
+**Widget tipo Línea – `CPUUtilization`:** permite observar la tendencia de la CPU a lo largo del tiempo e identificar picos de actividad.
+
+**Widget tipo Número – `VolumeReadBytes` y `VolumeWriteBytes` (EBS):** muestra el valor exacto e instantáneo de bytes leídos y escritos en disco. Métricas seleccionadas desde `EBS > Métricas por volumen` para el volumen `vol-0673cc270ab121...`.
+
+**¿Por qué monitorizar EBS?** Un disco saturado en lecturas o escrituras puede causar degradación de rendimiento en Apache y MySQL. Detectar esta saturación permite actuar antes de que los tiempos de respuesta se disparen.
+
+![Diálogo de creación del panel](/img/sprint3/26-dashboard-create.png)
+> 📸 **Figura 26** – Diálogo modal "Crear un nuevo panel" con nombre `Dashboard_NexOrder_Serrano` y botón `Crear un panel`
+
+![Dashboard final con los tres widgets](/img/sprint3/27-dashboard-final.png)
+> 📸 **Figura 27** – Panel final `Dashboard_NexOrder_Serrano` con widget de línea `CPUUtilization` y widgets de número `VolumeReadBytes` (0 B) y `VolumeWriteBytes` (694 kB)
+
+![Selector de tipo de widget](/img/sprint3/28-widget-type-selector.png)
+> 📸 **Figura 28** – Selector de tipo de widget con `Línea` seleccionado; opciones visibles: Tabla, Número, Medidor, Área apilada, Barra, Gráfico circular, Explorador
+
+![Widget CPU tipo Número](/img/sprint3/29-widget-cpu-number.png)
+> 📸 **Figura 29** – Selector de métricas con `CPUUtilization` de `NexOrder-EC2-Web` marcado; tipo de widget cambiado a `Número`
+
+![Gráfico de métricas con CPUUtilization](/img/sprint3/30-widget-cpu-line-graph.png)
+> 📸 **Figura 30** – Pantalla "Añadir gráfico de métrica" con `CPUUtilization` seleccionado y lista completa de métricas EC2 disponibles
+
+![Selector de namespace EBS](/img/sprint3/31-ebs-namespace-selector.png)
+> 📸 **Figura 31** – Selector de categorías de métricas con el namespace `EBS` (30 métricas) destacado en la lista
+
+![Métricas EBS VolumeReadBytes y VolumeWriteBytes seleccionadas](/img/sprint3/32-ebs-metrics-selected.png)
+> 📸 **Figura 32** – Lista de métricas EBS con `VolumeReadBytes` y `VolumeWriteBytes` del volumen `vol-0673cc270ab121...` seleccionados; gráfico de previsualización con ambas curvas (azul y naranja)
+
+---
+
+## 6. T17: Script de Despliegue Continuo
+
+El objetivo es automatizar la transferencia de archivos desde un entorno de staging hacia el `DocumentRoot` de Apache, con validación de errores y registro de auditoría completo.
+
+### 6.1 Preparación del Entorno
+
+```bash
+# 1. Crear la carpeta de staging (área de preparación antes de producción)
 mkdir -p /home/ec2-user/web-staging
 
-# Crear archivo de log para el despliegue
+# 2. Crear el archivo de log del despliegue
 sudo touch /var/log/deploy_nexorder.log
 
-# Asegurar permisos (tú eres el dueño para poder escribir)
+# 3. Asignar propietario para poder escribir sin sudo
 sudo chown ec2-user:ec2-user /var/log/deploy_nexorder.log
 ```
-![Figura 34(/img/sprint1/0-diagrama-logico.png) 
 
-# Crear el archivo del script
+**¿Por qué un directorio de staging?** Permite preparar y revisar los archivos antes de hacerlos públicos. El script hace un espejo exacto del staging en producción, por lo que solo lo que está en staging llega a la web.
+
+![Preparación del entorno de despliegue](/img/sprint3/33-deploy-env-setup.png)
+> 📸 **Figura 33** – Terminal ejecutando `mkdir -p /home/ec2-user/web-staging`, `touch /var/log/deploy_nexorder.log` y `chown ec2-user` del log
+
+---
+
+### 6.2 Creación del Script
+
+```bash
 sudo nano /usr/local/bin/deploy_nexorder.sh
-
-![Figura 35(/img/sprint1/0-diagrama-logico.png) 
-
-# Hacer el script ejecutable
-sudo chmod +x /usr/local/bin/deploy_nexorder.sh
 ```
 
-### T17 - Desarrollar script despliegue continuo (VERSIÓN CORREGIDA)
+Contenido del script con las correcciones aplicadas para Amazon Linux 2023:
 
-Crear `deploy.sh` que sincronice archivos web vía `rsync`, recargue el servicio `httpd` solo si es necesario, y registre toda la auditoría en log.
+[Enllaç al documento: deploy_nexorder.sh](/docs/src/desploy_nexorder.sh)
 
-### Preparar el entorno
-
-Necesitamos una carpeta "staging" (borrador) y un archivo de log con permisos de escritura.
-
-```bash
-# 1. Crear carpeta de trabajo (staging) en tu home
-mkdir -p /home/ec2-user/web-staging
-
-# 2. Crear archivo de log para el despliegue
-sudo touch /var/log/deploy_nexorder.log
-
-# 3. Asegurar permisos (tú eres el dueño para poder escribir)
-sudo chown ec2-user:ec2-user /var/log/deploy_nexorder.log
-```
-###  Crear el script `deploy_nexorder.sh`
-
-**Hacer el script ejecutable:**
 ```bash
 sudo chmod +x /usr/local/bin/deploy_nexorder.sh
 ```
 
-###  Simular un despliegue
-Vamos a crear un archivo en `staging` y verificar que el script lo mueve a la web pública.
+**Decisiones de diseño:**
 
-# Crear un archivo HTML de prueba en staging
+- **`sudo rsync`**: `/var/www/html/` pertenece al usuario `apache`. Sin `sudo`, el script fallaría al escribir en él.
+- **`systemctl reload httpd`** (no `restart`): `reload` recarga la configuración sin interrumpir las conexiones activas.
+- **`--delete`**: garantiza que producción sea un espejo exacto del staging. Sin esta opción, los archivos eliminados del staging permanecerían en producción.
+- **Doble validación `$?`**: se verifica por separado el éxito de `rsync` y del `reload`, con mensajes específicos para cada fallo.
+
+![Script deploy_nexorder.sh en nano](/img/sprint3/34-deploy-script-nano.png)
+> 📸 **Figura 34** – Editor nano con el contenido completo de `deploy_nexorder.sh` mostrando la configuración, el bloque `rsync -avz --delete` y la lógica de validación `$?`
+
+---
+
+### 6.3 Simulación y Validación
+
+```bash
+# 1. Crear archivo de prueba en staging
 sudo nano /home/ec2-user/web-staging/version2.html
 
-![Figura 36(/img/sprint1/0-diagrama-logico.png) 
-
-# Ejecutar el script de despliegue
+# 2. Ejecutar el despliegue
 /usr/local/bin/deploy_nexorder.sh
-```
 
-### Verificar resultados
-
-Comprobamos que el archivo llegó a la web y que el log registró todo correctamente.
-
-```bash
-# Verificar que el archivo está en la carpeta pública
+# 3. Verificar que el archivo llegó a producción
 ls -l /var/www/html/version2.html
 
-# Ver el contenido del log de auditoría (últimas líneas)
+# 4. Verificar el log de auditoría
 tail -10 /var/log/deploy_nexorder.log
 
-![Figura 37(/img/sprint1/0-diagrama-logico.png) 
-
-# 3. Probar acceso vía web (HTTP redirige a HTTPS)
+# 5. Probar acceso HTTP (debe redirigir a HTTPS)
 curl -I http://localhost/version2.html
 
-# 4. Probar acceso directo HTTPS (-k para ignorar certificado autofirmado)
+# 6. Probar acceso HTTPS directo
 curl -k https://localhost/version2.html
-
-![Figura 37(/img/sprint1/0-diagrama-logico.png) 
 ```
-### 📘 Justificación Técnica ASIXc
 
-Se ha implementado un script de despliegue continuo (`deploy_nexorder.sh`) que automatiza la sincronización de archivos web mediante `rsync` con modo espejo (`--delete`), garantizando que el entorno de producción refleje exactamente el staging. El script ejecuta `rsync` con privilegios elevados (`sudo`) para gestionar permisos en `/var/www/html`, propiedad del usuario `apache`. Incluye validación estricta de códigos de salida: el servicio `httpd` (nombre correcto en Amazon Linux 2023) solo se recarga (`systemctl reload`) si la transferencia fue exitosa, aplicando el principio de fallo seguro. Toda la ejecución queda registrada con timestamp en `/var/log/deploy_nexorder.log` para auditoría y trazabilidad.
-
-### Tarea: T18 - Prueba restauración backup
-
-Simular caída BD, restaurar desde dump comprimido, verificar integridad datos y tiempo recuperación
-# T18 - Prueba restauración backup
-Anotar hora inicio y verificar backup
-
-# Ver hora actual 
-date
-# Verificar backup disponible
-ls -lh /backups/*.sql.gz
-# Crear informe simple con nano
-nano ~/restore_test.md
+**Resultado del log:**
 ```
-![Figura 38(/img/sprint1/0-diagrama-logico.png) 
-
-Escribe dentro (sin EOF, solo texto):
+[2026-05-10 16:13:52] --- INICIO DESPLIEGUE ---
+[2026-05-10 16:13:52] Sincronización de archivos completada exitosamente.
+[2026-05-10 16:13:52] Recargando servicio httpd para aplicar cambios...
+[2026-05-10 16:13:52] Servicio httpd recargado correctamente.
+[2026-05-10 16:13:52] DESPLIEGUE COMPLETADO CON EXITO
+[2026-05-10 16:13:52] === FIN DESPLIEGUE ===
 ```
-# Informe Restauración - NexOrder
-Fecha: (pon fecha)
-Backup usado: (nombre del archivo .sql.gz)
-Hora inicio: (la que anotaste con date)
 
-## Pasos:
-1. Verificar backup
-2. DROP DATABASE nexorder_db
-3. Restaurar con gunzip + mysql
-4. Verificar datos
-5. Calcular RTO
+![Archivo version2.html en staging](/img/sprint3/35-staging-version2-html.png)
+> 📸 **Figura 35** – Editor nano con el contenido de `version2.html` (HTML de prueba con título `NexOrder v2.0` y mensaje de despliegue exitoso)
 
+![Script deploy completo con sudo rsync](/img/sprint3/36-deploy-script-full.png)
+> 📸 **Figura 36** – Editor nano con la segunda parte del script `deploy_nexorder.sh` mostrando el bloque `sudo rsync -avz --delete` y el bloque `if [ $? -eq 0 ]` completo
 
-## Resultado:
-(pendiente)
+![Verificación post-despliegue y log](/img/sprint3/37-deploy-verification-log.png)
+> 📸 **Figura 37** – `ls -l /var/www/html/version2.html` confirmando el archivo en producción (229 bytes, May 10 16:13) + `tail -10 /var/log/deploy_nexorder.log` con las 6 líneas de auditoría del despliegue exitoso
 
-![Figura 39(/img/sprint1/0-diagrama-logico.png) 
+![curl HTTP y HTTPS sobre version2.html](/img/sprint3/38-deploy-curl-test.png)
+> 📸 **Figura 38** – `curl -I http://localhost/version2.html` devolviendo `301 Moved Permanently` + `curl -k https://localhost/version2.html` devolviendo el HTML completo de `NexOrder v2.0`
 
-## Simular caída 
+---
+
+## 7. T18: Prueba de Restauración y RTO
+
+El RTO (Recovery Time Objective) es el tiempo máximo tolerable para restaurar un servicio tras una caída. Esta tarea mide el RTO real del sistema bajo condiciones controladas.
+
+### 7.1 Verificación del Backup Disponible
 
 ```bash
-# Conectar a MySQL como admin
+# Anotar hora de inicio (para calcular RTO después)
+date
+# Resultado: Tue May 12 14:42:27 UTC 2026
+
+# Verificar los backups disponibles
+ls -lh /backups/*.sql.gz
+
+# Crear el informe de restauración
+nano ~/restore_test.md
+```
+
+**Backups disponibles:**
+```
+-rw-r--r--. 1 ec2-user ec2-user 2.4K May 11 14:00 nexorder_db_20260511_140001.sql.gz
+-rw-r--r--. 1 ec2-user ec2-user 2.4K May 12 14:00 nexorder_db_20260512_140001.sql.gz
+```
+
+![Hora de inicio, listado de backups e informe inicial](/img/sprint3/39-restore-start-verify.png)
+> 📸 **Figura 39** – `date` mostrando `Tue May 12 14:42:27 UTC 2026` + `ls -lh /backups/*.sql.gz` con los archivos disponibles + `nano ~/restore_test.md` con el informe inicial
+
+![restore_test.md en estado inicial](/img/sprint3/40-restore-report-initial.png)
+> 📸 **Figura 40** – Editor nano con el contenido inicial de `restore_test.md` con los campos pendientes de completar
+
+---
+
+### 7.2 Simulación de Caída (DROP DATABASE)
+
+```bash
+# Conectar como administrador a RDS
 mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u admin -p
 ```
-figura 40
-Dentro de MySQL ejecuta línea por línea:
+
+Dentro de MySQL (`connection id 5249`):
+
 ```sql
--- Verificar que existe
+-- Verificar que la BD existe
 SHOW DATABASES LIKE 'nexorder_db';
 
--- Usar la BD
+-- Acceder a la BD y ver sus tablas actuales
 USE nexorder_db;
+SHOW TABLES;    -- 5 tablas: detalle_pedidos, estados, pedidos, productos, usuarios
 
--- Ver tablas actuales
-SHOW TABLES;
-
--- SIMULAR CAÍDA: Borrar BD
+-- SIMULAR CAÍDA CRÍTICA: eliminar la BD completa
 DROP DATABASE nexorder_db;
+-- Query OK, 5 rows affected (0.17 sec)
 
 -- Verificar que ya no existe
 SHOW DATABASES LIKE 'nexorder_db';
+-- Empty set (0.00 sec)
 
--- Salir
 EXIT;
-figura 41
+```
 
- El último `SHOW DATABASES` debe devolver vacío (0 filas).
+La BD `nexorder_db` con sus 5 tablas ha sido eliminada. El sistema está en estado de fallo crítico.
+
+![Simulación DROP DATABASE y verificación](/img/sprint3/41-drop-database-simulation.png)
+> 📸 **Figura 41** – Login MySQL con `connection id 5249` + `SHOW DATABASES`, `USE nexorder_db`, `SHOW TABLES` (5 tablas), `DROP DATABASE nexorder_db` con `Query OK` y `SHOW DATABASES` final devolviendo `Empty set`
 
 ---
 
-## Restaurar desde backup
+### 7.3 Restauración desde Backup
+
+La restauración en RDS requiere filtrar las sentencias `SET @@SESSION.SQL_LOG_BIN` y `SET @@GLOBAL` del dump, ya que estas requieren el privilegio `SUPER` que AWS no concede en RDS gestionado:
 
 ```bash
-# Ver el backup más reciente
-ls -t /backups/*.sql.gz | head -1
-
-# Restaurar (reemplaza con TU archivo real)
+# Restaurar filtrando las sentencias incompatibles con RDS
 gunzip -c /backups/nexorder_db_20260512_140001.sql.gz \
   | grep -v "SET @@SESSION.SQL_LOG_BIN" \
   | grep -v "SET @@GLOBAL" \
-  | mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u admin -p nexorder_db
-
-![Figura 42(/img/sprint1/0-diagrama-logico.png) 
-
+  | mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com \
+          -u admin -p nexorder_db
 ```
-> Introduce la contraseña de `admin` cuando la pida.
 
- Si no muestra errores, la restauración fue exitosa.
+**¿Por qué el filtrado?** `mysqldump` incluye comandos de configuración de replicación (`SET @@SESSION.SQL_LOG_BIN=0`) que requieren privilegios de superusuario. En Amazon RDS, AWS no concede `SUPER` por razones de seguridad del servicio gestionado. El filtrado con `grep -v` elimina estas líneas sin afectar a los datos.
+
+![Restauración con gunzip y filtrado SET @@](/img/sprint3/42-restore-gunzip-mysql.png)
+> 📸 **Figura 42** – Terminal con `gunzip -c backup.sql.gz | grep -v "SET @@SESSION..." | grep -v "SET @@GLOBAL" | mysql ...` + verificación posterior con `SHOW TABLES` mostrando las 5 tablas restauradas
 
 ---
 
-## Paso 4: Verificar integridad de datos
+### 7.4 Verificación de Integridad
 
 ```bash
-# Conectar de nuevo a MySQL
 mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u admin -p
 ```
 
-Dentro de MySQL:
 ```sql
--- Seleccionar BD restaurada
 USE nexorder_db;
-
--- Verificar tablas
 SHOW TABLES;
 
--- Contar registros
-SELECT COUNT(*) as productos FROM productos;
-SELECT COUNT(*) as usuarios FROM usuarios;
-SELECT COUNT(*) as estados FROM estados;
+SELECT COUNT(*) as productos FROM productos;   -- 7
+SELECT COUNT(*) as usuarios FROM usuarios;     -- 2
+SELECT COUNT(*) as estados FROM estados;       -- 5
 
--- Ver datos reales
 SELECT nombre, precio FROM productos LIMIT 3;
-
--- Salir
-EXIT;
 ```
-![Figura 43(/img/sprint1/0-diagrama-logico.png) 
 
-## Paso 5: Calcular RTO y finalizar informe
+**Resultado de integridad:**
+
+| Tabla | Registros | Estado |
+|-------|-----------|--------|
+| `productos` | 7 | ✅ Íntegro |
+| `usuarios` | 2 | ✅ Íntegro |
+| `estados` | 5 | ✅ Íntegro |
+| `pedidos` | 0 | ✅ OK (vacía por diseño) |
+| `detalle_pedidos` | 0 | ✅ OK (vacía por diseño) |
+
+Los datos de prueba (`Ensalada César $8.50`, `Pizza Margarita $12.00`, `Hamburguesa Clásica $10.50`) están presentes y son correctos.
+
+![Verificación de integridad post-restauración](/img/sprint3/43-restore-integrity-check.png)
+> 📸 **Figura 43** – MySQL mostrando `SHOW TABLES` (5 tablas), `COUNT(*)` de productos (7), usuarios (2) y estados (5), y `SELECT nombre, precio FROM productos LIMIT 3` con datos reales
+
+---
+
+### 7.5 Cálculo del RTO
 
 ```bash
-# 1. Anotar hora final
+# Anotar hora de finalización
 date
-![Figura 44(/img/sprint1/0-diagrama-logico.png) 
-
-# 2. Calcular RTO manualmente:
-RTO = Hora fin - Hora inicio
-RTO = 15:06:28 - 14:42:27
-
-Desglose:
-  15:06:28
-- 14:42:27
-----------
-   0:24:01  → 24 minutos y 1 segundo
-
-
-# 3. Editar informe con nano
-nano ~/restore_test.md
+# Resultado: Tue May 12 15:06:28 UTC 2026
 ```
 
-Actualiza con datos reales:
+**Cálculo:**
 ```
-# Informe Restauración - NexOrder
-Fecha: 2026-05-12
-Backup usado: nexorder_db_20260512_140001.sql.gz
+Hora inicio (fallo detectado):  14:42:27
+Hora fin   (sistema restaurado): 15:06:28
+────────────────────────────────────────
+RTO real:                        0h 24m 01s
+```
 
-## Tiempos de recuperación
-Hora inicio: 14:42:27
-Hora fin: 15:06:28
-RTO: 24 minutos y 1 segundo
+**Informe final `~/restore_test.md`:**
 
-## Pasos ejecutados:
-1. Verificar backup disponible en /backups/
-2. Crear BD: CREATE DATABASE nexorder_db
-3. Restaurar: gunzip -c backup.sql.gz | grep -v "SET @@" | mysql -h endpoint -u admin -p nexorder_db
-4. Verificar: SHOW TABLES + SELECT COUNT(*)
-5. Confirmar integridad de datos (5 tablas, datos íntegros)
+[Enllaç al documento: restore_test.md](/docs/src/restore_test.md)
 
-## Resultado:
-Restauración exitosa. BD operativa con 5 tablas y datos íntegros.
-RTO de 24min 01s cumple requisitos del proyecto ASIXc
+![Hora de fin y cálculo del RTO](/img/sprint3/44-rto-calculation.png)
+> 📸 **Figura 44** – `date` mostrando `Tue May 12 15:06:28 UTC 2026` con el cálculo manual `15:06:28 - 14:42:27 = 0:24:01`
 
-![Figura 45(/img/sprint1/0-diagrama-logico.png) 
+![restore_test.md completado](/img/sprint3/45-restore-report-final.png)
+> 📸 **Figura 45** – Editor nano con `restore_test.md` completado: hora inicio, hora fin, RTO calculado y resultado final con los tres checks
 
-Use el nmap  para comprobar qué puerto está abierto pudiendo obtener esta información
- Descubrimiento de Puertos:El programa ya ha encontrado el puerto 22/tcp (SSH) y el puerto 80/tcp (HTTP) abierto
-Progreso del escaneo Esto significa que no solo sabe que el puerto 80 está abierto si no que esta preguntando que version es
-Detección de latencia:Podemos ver que  servidor responde muy rápido lo que indica que la conexión entre tu Kali y el servidor AWS es estable
+---
 
-![Figura 46(/img/sprint1/0-diagrama-logico.png) 
+## 8. T19: Auditoría de Seguridad con nmap
 
+La auditoría valida que la superficie de exposición del servidor es mínima: solo los puertos estrictamente necesarios están abiertos desde Internet.
 
+**Herramienta:** nmap 7.95 ejecutado desde máquina Kali Linux (`kali@VictorS`)
 
+```bash
+nmap -p 1-1000 -T4 -A -V 44.207.176.14
+```
 
+**Parámetros:**
 
+| Flag | Función |
+|------|---------|
+| `-p 1-1000` | Escanea el rango de puertos más comunes |
+| `-T4` | Velocidad agresiva (apropiada para redes de confianza) |
+| `-A` | Detección de OS, versiones de servicios y scripts NSE |
+| `-V` | Verbose: información detallada del progreso |
 
+**Resultado del escaneo:**
+
+| Puerto | Estado | Servicio |
+|--------|--------|---------|
+| `22/tcp` | Abierto | SSH (restringido a IP admin por Security Group) |
+| `80/tcp` | Abierto | HTTP (redirige automáticamente a HTTPS) |
+| `443/tcp` | Abierto | HTTPS (TLS con certificado autofirmado) |
+
+**Interpretación:**
+- **Solo 3 puertos abiertos** en el rango 1-1000: superficie de ataque mínima, consistente con la política de mínimo privilegio aplicada desde el Sprint 1.
+- **Puerto 3306 (MySQL) cerrado**: la BD no es alcanzable desde Internet (solo desde `SG-Web-NexOrder` por Security Group).
+- **Conexión estable**: baja latencia entre la máquina Kali y el servidor AWS confirma conectividad correcta.
+- **Ningún servicio innecesario expuesto**: no hay APIs internas, paneles de administración ni servicios de datos accesibles públicamente.
+
+![Escaneo nmap desde Kali Linux](/img/sprint3/46-nmap-scan-result.png)
+> 📸 **Figura 46** – Terminal Kali Linux (`kali@VictorS`) ejecutando `nmap -p 1-1000 -T4 -A -V 44.207.176.14` con la salida completa del escaneo mostrando el progreso de NSE scripts y el resultado final
+
+---
+
+## 9. Justificación de Criterios
+
+### 9.1 M0374 – Administración Remota y Automatización
+
+| Evidencia | Tarea | Estado |
+|-----------|-------|--------|
+| Script Bash `backup_nexorder.sh` con control de errores `$?` y log timestamped | T13 | ✅ |
+| Tarea `cron` (`0 3 * * *`) con rutas absolutas y redirección `2>&1` | T14 | ✅ |
+| Script Bash `deploy_nexorder.sh` con `rsync`, doble validación y `systemctl reload` | T17 | ✅ |
+| Gestión de servicios con `systemctl` (crond, httpd) | T14, T17 | ✅ |
+
+### 9.2 M0377 – Backups Lógicos y Rotación
+
+| Evidencia | Tarea | Estado |
+|-----------|-------|--------|
+| Exportación lógica con `mysqldump` + compresión `gzip` en pipeline | T13 | ✅ |
+| Política de retención 7 días con `find -mtime +7 -delete` automatizada | T13 | ✅ |
+| Rotación de logs Apache: `daily`, `rotate 7`, `compress`, `postrotate reload` | T15 | ✅ |
+| Rotación de logs MySQL: `daily`, `rotate 7`, `compress`, `copytruncate` | T15 | ✅ |
+
+### 9.3 M0378 – Auditoría y Recuperación
+
+| Evidencia | Tarea | Estado |
+|-----------|-------|--------|
+| Registro timestamped en `/var/log/` para backups y despliegues | T13, T17 | ✅ |
+| Procedimiento de recuperación documentado y ejecutado (`DROP → restore → verify`) | T18 | ✅ |
+| RTO real calculado y documentado: **24 min 01s** | T18 | ✅ |
+| Informe `restore_test.md` con tiempos, pasos y resultado | T18 | ✅ |
+
+### 9.4 C037 – Seguridad y Resiliencia
+
+| Evidencia | Tarea | Mecanismo |
+|-----------|-------|-----------|
+| CloudWatch `CPUUtilization > 80%` → SNS email automático | T16 | Monitorización proactiva |
+| Dashboard con CPU + `VolumeReadBytes` + `VolumeWriteBytes` | T16 | Visibilidad centralizada |
+| `rsync --delete` + `systemctl reload` (fallo seguro) | T17 | Despliegue controlado |
+| Filtrado `grep -v "SET @@"` para compatibilidad RDS | T18 | Resiliencia en servicio gestionado |
+| nmap confirma superficie de exposición mínima (3 puertos) | T19 | Auditoría externa |
+| Permisos `700`/`600` en backups y logs sensibles | T13 | Protección de datos en reposo |
+
+---
+
+*Documentación completada: 27 de abril – 3 de mayo 2026*
+
+*Autores: Victor Serrano · Trishan Mizhquiri*
