@@ -46,7 +46,8 @@
 
 El Sprint 2 construye la **capa de aplicación** sobre la infraestructura de red del Sprint 1. Los servicios desplegados forman una pila completa con seguridad en cada nivel:
 
-![Figura 0](/img/sprint1/0-arquitectura-web.png)
+![Figura 0](/img/sprint2/0-arquitectura-web.png)
+sprint2
 > 📸 **Figura 0 – Arquitectura de servicios:** diagrama conceptual de la pila de aplicación web
 
 ---
@@ -77,13 +78,13 @@ sudo dnf install -y httpd php
 
 **¿Por qué estos dos paquetes juntos?** `httpd` (Apache 2.4) es el servidor web que gestiona las conexiones HTTP/HTTPS entrantes. PHP permite que Apache ejecute scripts del lado del servidor, que es el lenguaje con el que está desarrollada la aplicación NexOrder. Sin ambos, el servidor solo podría servir archivos estáticos.
 
-![Figura 1](/img/sprint1/1-ssh-conexion.png)
+![Figura 1](/img/sprint2/1-ssh-conexion.png)
 > 📸 **Figura 1** – Terminal con `ssh -i "NexOrder-SSH-Key.pem" ec2-user@52.90.85.X` conectando correctamente a Amazon Linux 2023
 
-![Figura 2](/img/sprint1/2-dnf-update.png)
+![Figura 2](/img/sprint2/2-dnf-update.png)
 > 📸 **Figura 2** – Salida de `sudo dnf update -y` mostrando `Complete!` con Amazon Linux 2023 Kernel Livepatch repository
 
-![Figura 3](/img/sprint1/3-install-httpd-php.png)
+![Figura 3](/img/sprint2/3-install-httpd-php.png)
 > 📸 **Figura 3** – Salida de `sudo dnf install -y httpd php` con las versiones `httpd 2.4.66` y `php8.5 8.5.4` instaladas
 
 ---
@@ -111,13 +112,13 @@ curl localhost
 
 **Nota:** El mensaje `AH00558: httpd: Could not reliably determine the server's fully qualified domain name` en los logs es una advertencia cosmética sobre el `ServerName`; no afecta al funcionamiento y se suprimirá al configurar los VirtualHosts.
 
-![Figura 4](/img/sprint1/4-start-httpd.png)
+![Figura 4](/img/sprint2/4-start-httpd.png)
 > 📸 **Figura 4** – Terminal con `systemctl start httpd` y `systemctl enable httpd` creando el symlink de arranque automático
 
-![Figura 5](/img/sprint1/5-status-httpd.png)
+![Figura 5](/img/sprint2/5-status-httpd.png)
 > 📸 **Figura 5** – `systemctl status httpd` mostrando `active (running)` con PID 26333, puerto 80 en escucha
 
-![Figura 6](/img/sprint1/6-curl-localhost.png)
+![Figura 6](/img/sprint2/6-curl-localhost.png)
 > 📸 **Figura 6** – `curl localhost` devolviendo `<!DOCTYPE HTML PUBLIC ... It works! Apache httpd`
 
 ---
@@ -140,7 +141,7 @@ sudo dnf install -y mod_ssl openssl
 | `mod_ssl` | 1:2.4.66-1.amzn2023.0.1 | 111 k |
 | `sscg` (dependencia) | 3.0.3-77.amzn2023 | 46 k |
 
-![Figura 7](/img/sprint1/7-install-ssl.png)
+![Figura 7](/img/sprint2/7-install-ssl.png)
 > 📸 **Figura 7** – Salida de `sudo dnf install -y mod_ssl openssl` con instalación correcta de `mod_ssl` y `sscg`
 
 ---
@@ -172,7 +173,7 @@ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 
 **¿Por qué autofirmado?** En un entorno de laboratorio o preproducción sin dominio DNS registrado, un certificado de Let's Encrypt no es viable (requiere dominio público). El certificado autofirmado proporciona cifrado TLS idéntico al de un certificado CA; la única diferencia es que los navegadores muestran una advertencia de confianza, lo que se acepta con `-k` en `curl` o añadiendo excepción en el navegador.
 
-![Figura 8](/img/sprint1/8-generate-certs.png)
+![Figura 8](/img/sprint2/8-generate-certs.png)
 > 📸 **Figura 8** – Terminal ejecutando el comando `openssl req -x509 ...` con salida de generación de clave y certificado
 
 ---
@@ -192,7 +193,7 @@ sudo nano /etc/httpd/conf.d/nexorder-ssl.conf
 - `SSLCertificateFile` / `SSLCertificateKeyFile`: apuntan al certificado y clave generados en el paso anterior.
 - `Strict-Transport-Security`: cabecera HSTS que instruye al navegador a nunca volver a usar HTTP para ese dominio durante `max-age` segundos (31.536.000 = 1 año). Previene ataques de downgrade.
 
-![Figura 9](/img/sprint1/9-ssl-config.png)
+![Figura 9](/img/sprint2/9-ssl-config.png)
 > 📸 **Figura 9** – Editor nano mostrando el contenido completo de `nexorder-ssl.conf` con ambos VirtualHost y la cabecera HSTS
 
 Después de guardar, se verifica la sintaxis y se reinicia Apache:
@@ -200,7 +201,7 @@ Después de guardar, se verifica la sintaxis y se reinicia Apache:
 ```bash
 sudo httpd -t && sudo systemctl restart httpd
 ```
-![Figura 10](/img/sprint1/10-restart-httpd.png)
+![Figura 10](/img/sprint2/10-restart-httpd.png)
 > 📸 **Figura 10** – `sudo httpd -t && sudo systemctl restart httpd` con salida `Syntax OK` y servicio reiniciado
 
 **Pruebas de redirección y HTTPS:**
@@ -220,7 +221,7 @@ Location: https://localhost/
 Server: Apache
 ```
 
-![Figura 11](/img/sprint1/11-redirect-http.png)
+![Figura 11](/img/sprint2/11-redirect-http.png)
 > 📸 **Figura 11** – `curl -I http://localhost` devolviendo `HTTP/1.1 301 Moved Permanently` con `Location: https://localhost/`
 
 **Resultado de `curl -Ik https://localhost`:**
@@ -230,7 +231,7 @@ Server: Apache
 Strict-Transport-Security: max-age=31536000; includeSubDomains
 ```
 
-![Figura 12](/img/sprint1/12-https-working.png)
+![Figura 12](/img/sprint2/12-https-working.png)
 > 📸 **Figura 12** – `curl -Ik https://localhost` devolviendo `200 OK` con cabecera `Strict-Transport-Security: max-age=31536000; includeSubDomains`
 
 ---
@@ -265,19 +266,19 @@ LISTEN 0  511  *:80   *:*  users:(("httpd",pid=36204,...))
 LISTEN 0  511  *:443  *:*  users:(("httpd",pid=36204,...))
 ```
 
-![Figura 13](/img/sprint1/13-headers-module.png)
+![Figura 13](/img/sprint2/13-headers-module.png)
 > 📸 **Figura 13** – `echo 'LoadModule headers_module ...'` añadido correctamente a `00-base.conf`
 
-![Figura 14](/img/sprint1/14-verificar.png)
+![Figura 14](/img/sprint2/14-verificar.png)
 > 📸 **Figura 14** – Con `httpd -M | grep ssl_module` estamos confirmando `ssl_module (shared)`
 
-![Figura 15](/img/sprint1/15-rewrite-module.png)
+![Figura 15](/img/sprint2/15-rewrite-module.png)
 > 📸 **Figura 15** – `echo 'LoadModule rewrite_module ...'` añadido correctamente
 
-![Figura 16](/img/sprint1/16-syntax-ok.png)
+![Figura 16](/img/sprint2/16-syntax-ok.png)
 > 📸 **Figura 16** – `sudo httpd -t` devolviendo `Syntax OK`
 
-![Figura 17](/img/sprint1/17-ss-tlnp.png)
+![Figura 17](/img/sprint2/17-ss-tlnp.png)
 > 📸 **Figura 17** – `ss -tlnp | grep httpd` mostrando escucha simultánea en `*:80` y `*:443`
 
 ---
@@ -300,10 +301,10 @@ sudo systemctl enable --now fail2ban
 
 El flag `--now` de `systemctl enable` combina `enable` y `start` en un solo comando, creando el symlink de arranque automático e iniciando el servicio inmediatamente.
 
-![Figura 18](/img/sprint1/18-install-fail2ban.png)
+![Figura 18](/img/sprint2/18-install-fail2ban.png)
 > 📸 **Figura 18** – `sudo dnf install -y fail2ban` con instalación de `fail2ban 1.1.0-1.amzn2023.0.1`
 
-![Figura 19](/img/sprint1/19-enable-fail2ban.png)
+![Figura 19](/img/sprint2/19-enable-fail2ban.png)
 > 📸 **Figura 19** – `sudo systemctl enable --now fail2ban` creando el symlink en `/usr/lib/systemd/system/fail2ban.service`
 
 ---
@@ -377,6 +378,7 @@ mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u admin -p
 
 **Resultado:** `MySQL connection id is 100` → conexión exitosa a MySQL 8.0.40.
 
+![Figura 22](/img/sprint2/22-mysql-login.png)
 > 📸 **Figura 22** – Terminal con login MySQL como `admin`, mostrando `connection id 100` y `Server version: 8.0.40`
 
 ---
@@ -419,9 +421,13 @@ SHOW GRANTS FOR 'nexorder_app'@'%';
 +-----------------------------------------------------------------------+
 2 rows in set (0.00 sec)
 ```
-
+![Figura 23](/img/sprint2/23-create-db-user.png)
 > 📸 **Figura 23** – `CREATE DATABASE`, `CREATE USER` y `GRANT SELECT, INSERT, UPDATE` ejecutados con `Query OK`
+
+![Figura 24](/img/sprint2/24-drop-test-flush.png)
 > 📸 **Figura 24** – `DROP DATABASE test`, `FLUSH PRIVILEGES` y `SHOW GRANTS FOR 'nexorder_app'@'%'` con la tabla de permisos resultante
+
+![Figura 25](/img/sprint2/25-show-grants.png)
 > 📸 **Figura 25** – Vista ampliada de `SHOW GRANTS` confirmando los dos grants: USAGE global + SELECT/INSERT/UPDATE en nexorder_db
 
 ---
@@ -434,6 +440,8 @@ Se verifica que el usuario `nexorder_app` puede conectarse y operar dentro de su
 # Conectar como el usuario de aplicación
 mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com -u nexorder_app -p
 ```
+![Figura 26](/img/sprint2/26-login-nexorder.png)
+> 📸 **Figura 26** – Login MySQL como `nexorder_app` con `connection id 105`
 
 Dentro de MySQL:
 
@@ -456,7 +464,7 @@ ERROR 1142 (42000): CREATE command denied to user 'nexorder_app'@'10.0.1.237' fo
 
 Este error confirma que la seguridad por capas funciona. En un escenario de SQL Injection, un atacante que controle la aplicación PHP no podría borrar tablas, crear backdoors ni modificar la estructura de la base de datos.
 
-> 📸 **Figura 26** – Login MySQL como `nexorder_app` con `connection id 105`
+![Figura 27](/img/sprint2/27-permission-denied.png)
 > 📸 **Figura 27** – `CREATE TABLE prueba_fallo` devolviendo `ERROR 1142 (42000): CREATE command denied`
 
 ---
@@ -474,6 +482,11 @@ mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com \
   -u admin -p \
   nexorder_db < /home/ec2-user/nexorder_schema.sql
 ```
+![Figura 28](/img/sprint2/28-schema-sql.png)
+> 📸 **Figura 28** – Editor nano mostrando `nexorder_schema.sql` con las primeras tablas (`estados`, `usuarios`)
+
+![Figura 29](/img/sprint2/29-execute-schema.png)
+> 📸 **Figura 29** – Ejecución del script y salida tabulada con `SHOW TABLES`, conteo de registros y menú de productos
 
 **Tablas creadas:**
 
@@ -496,11 +509,13 @@ mysql> use nexorder_db;
 mysql> show tables;
 mysql> DESCRIBE estados;
 ```
-
-> 📸 **Figura 28** – Editor nano mostrando `nexorder_schema.sql` con las primeras tablas (`estados`, `usuarios`)
-> 📸 **Figura 29** – Ejecución del script y salida tabulada con `SHOW TABLES`, conteo de registros y menú de productos
+![Figura 30](/img/sprint2/30-describe-tables-1.png)
 > 📸 **Figura 30** – `SHOW TABLES` mostrando las 5 tablas + `DESCRIBE estados` y `DESCRIBE pedidos`
+
+![Figura 31](/img/sprint2/31-describe-tables-2.png)
 > 📸 **Figura 31** – `DESCRIBE detalle_pedidos` con columna `subtotal STORED GENERATED` + `DESCRIBE usuarios` y `DESCRIBE productos`
+
+![Figura 32](/img/sprint2/32-describe-tables-3.png)
 > 📸 **Figura 32** – `DESCRIBE pedidos` completo con claves foráneas y `DESCRIBE productos` con el ENUM de categorías
 
 ---
@@ -516,6 +531,8 @@ Se edita el archivo de configuración principal de Apache:
 ```bash
 sudo nano /etc/httpd/conf/httpd.conf
 ```
+![Figura 33](/img/sprint2/33-httpd-conf-start.png)
+> 📸 **Figura 33** – Editor nano con el inicio de `/etc/httpd/conf/httpd.conf` (archivo principal de configuración)
 
 Al final del archivo se añaden dos directivas:
 
@@ -529,7 +546,7 @@ ServerSignature Off
 - **`ServerTokens Prod`**: controla qué información se incluye en la cabecera `Server:` de cada respuesta HTTP. Con el valor `Prod`, solo se envía `Apache` (sin versión, sin OS, sin módulos). Por defecto enviaría algo como `Apache/2.4.66 (Amazon Linux) OpenSSL/3.5.5 PHP/8.5.4`.
 - **`ServerSignature Off`**: elimina el pie de página que Apache añade a las páginas de error generadas automáticamente (404, 403, 500...), que mostraría la versión del servidor y el hostname.
 
-> 📸 **Figura 33** – Editor nano con el inicio de `/etc/httpd/conf/httpd.conf` (archivo principal de configuración)
+![Figura 34](/img/sprint2/34-httpd-conf-end.png)
 > 📸 **Figura 34** – Final del archivo con `ServerTokens Prod` y `ServerSignature Off` añadidos y guardados
 
 ---
@@ -549,6 +566,7 @@ Server: Apache
 
 La cabecera `Server:` muestra únicamente `Apache`, sin número de versión, módulos ni sistema operativo. Un atacante que haga reconocimiento no podrá determinar qué versión exacta usar para sus exploits.
 
+![Figura 35](/img/sprint2/35-server-tokens.png)
 > 📸 **Figura 35** – `curl -I localhost` devolviendo `Server: Apache` (sin versión) con código `403 Forbidden` (normal, sin index)
 
 ---
@@ -575,6 +593,7 @@ sudo chmod 644 *.php
 
 **¿Por qué `chown apache:apache`?** Apache ejecuta sus workers como el usuario `apache`. Si los archivos pertenecieran a `root` o `ec2-user`, el proceso de Apache no podría leerlos correctamente en ciertas configuraciones de seguridad de SELinux/AppArmor.
 
+![Figura 36](/img/sprint2/36-create-php-files.png)
 > 📸 **Figura 36** – Terminal ejecutando `touch`, `chown apache:apache *.php` y `chmod 644 *.php` en `/var/www/html/`
 
 ---
@@ -585,55 +604,27 @@ sudo chmod 644 *.php
 
 Archivo de prueba de conectividad que valida la conexión PDO a RDS con manejo de errores completo:
 
-```php
-<?php
-$host    = 'nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com';
-$db      = 'nexorder_db';
-$user    = 'nexorder_app';
-$pass    = 'N3x0r-DB-2026!Sec';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,   // Sentencias preparadas reales
-    PDO::ATTR_TIMEOUT            => 5,        // Timeout para no bloquear
-];
-
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-    echo "<h1>✅ Conexión exitosa a RDS MySQL 8.0</h1>";
-    echo "<p>Host: " . htmlspecialchars($host) . "</p>";
-} catch (PDOException $e) {
-    echo "<h1>❌ Error PDO: " . htmlspecialchars($e->getMessage()) . "</h1>";
-}
-?>
-```
 
 **Prácticas de seguridad aplicadas:**
 - `ATTR_EMULATE_PREPARES => false`: fuerza el uso de sentencias preparadas reales en el servidor MySQL, lo que previene inyecciones SQL (el driver no construye el SQL en el cliente).
 - `htmlspecialchars()` en todos los outputs: previene XSS (Cross-Site Scripting) convirtiendo `<`, `>`, `"`, `'` en sus equivalentes HTML.
 - `ERRMODE_EXCEPTION`: los errores de BD lanzan excepciones capturables, nunca se muestran en crudo.
 
+![Figura 37](/img/sprint2/37-connexio-php.png)
 > 📸 **Figura 37** – Editor nano con el contenido completo de `connexio.php` incluyendo el bloque PDO con opciones de seguridad
 
 #### `index.php` — Página principal
 
 Página de menú estático con badges de estado y enlaces a los archivos de validación. Incluye el badge `HTTPS Activo` que confirma visualmente que el certificado SSL está activo.
 
+![Figura 38](/img/sprint2/38-index-php.png)
 > 📸 **Figura 38** – Editor nano con el contenido completo de `index.php` (HTML con badge `HTTPS Activo` y tarjetas de características)
 
 #### `panel.php` — Panel de estado y consulta segura
 
 Panel de validación funcional que ejecuta una consulta PDO segura para mostrar la versión de MySQL, el usuario conectado y la base de datos activa:
 
-```php
-$stmt = $pdo->query("SELECT VERSION() AS mysql_ver, USER() AS db_user, DATABASE() AS active_db");
-$row  = $stmt->fetch();
-// Muestra: mysql_ver | db_user | active_db
-```
-
+![Figura 39](/img/sprint2/39-panel-php.png)
 > 📸 **Figura 39** – Editor nano con el contenido completo de `panel.php` incluyendo la conexión PDO y la tabla HTML de estado
 
 ---
@@ -665,9 +656,16 @@ curl -k https://localhost/panel.php
 | `curl -k https://localhost/connexio.php` | `✅ Conexión exitosa a RDS MySQL 8.0` |
 | `curl -k https://localhost/panel.php` | Tabla con versión MySQL, usuario y BD activa |
 
+![Figura 40](/img/sprint2/40-php-version.png)
 > 📸 **Figura 40** – `php -v` mostrando `PHP 8.5.4 (cli)` con Zend Engine v4.5.4
+
+![Figura 41](/img/sprint2/41-curl-index.png)
 > 📸 **Figura 41** – `curl -k https://localhost/` devolviendo el HTML de `index.php` con badge `HTTPS Activo`
+
+![Figura 42](/img/sprint2/42-curl-connexio.png)
 > 📸 **Figura 42** – `curl -k https://localhost/connexio.php` mostrando `✅ Conexión exitosa a RDS MySQL 8.0`
+
+![Figura 43](/img/sprint2/43-curl-panel.png)
 > 📸 **Figura 43** – `curl -k https://localhost/panel.php` devolviendo la tabla de estado (primer intento muestra error de driver PDO que se resolvió después)
 
 ---
@@ -697,7 +695,7 @@ public
   services: dhcpv6-client http https mdns ssh
   ...
 ```
-
+![Figura 44](/img/sprint2/44-firewall-cmd.png)
 > 📸 **Figura 44** – Ejecución de los cuatro comandos `firewall-cmd` con salidas `success` y `--list-all` mostrando `services: dhcpv6-client http https mdns ssh`
 
 ---
@@ -713,6 +711,11 @@ curl -k https://$(curl -s https://checkip.amazonaws.com)/index.php
 # Prueba de redirección HTTP→HTTPS
 curl -L http://localhost/index.php | head -10
 ```
+![Figura 45](/img/sprint2/45-curl-public.png)
+> 📸 **Figura 45** – `curl -k https://$(curl -s https://checkip.amazonaws.com)/index.php` devolviendo el HTML correcto de `index.php`
+
+![Figura 46](/img/sprint2/46-curl-redirect.png)
+> 📸 **Figura 46** – `curl -L http://localhost/index.php | head -10` (muestra advertencia SSL por hostname 'localhost' vs CN '44.207.176.14')
 
 URL de acceso desde navegador externo:
 ```
@@ -721,8 +724,7 @@ https://44.207.176.14/index.php
 
 **Resultado:** La página `index.php` carga correctamente en el navegador con el badge `HTTPS Activo` y las dos tarjetas de características técnicas. El candado muestra "No seguro" porque es un certificado autofirmado (esperado).
 
-> 📸 **Figura 45** – `curl -k https://$(curl -s https://checkip.amazonaws.com)/index.php` devolviendo el HTML correcto de `index.php`
-> 📸 **Figura 46** – `curl -L http://localhost/index.php | head -10` (muestra advertencia SSL por hostname 'localhost' vs CN '44.207.176.14')
+![Figura 47](/img/sprint2/47-chrome-nexorder.png)
 > 📸 **Figura 47** – Navegador Chrome cargando `https://44.207.176.14/index.php` con la interfaz completa de NexOrder y badge `HTTPS Activo`
 
 ---
