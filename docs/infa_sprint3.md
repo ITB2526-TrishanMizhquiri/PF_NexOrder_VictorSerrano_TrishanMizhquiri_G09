@@ -204,6 +204,9 @@ crontab -e
 ### T15: Implementar rotación de logs (logrotate)
 Añadimos en el archivo sudo nano /etc/logrotate.d/httpd  y eliminamos el que había ya que si no va a salir un error de entrada duplicada 
 ![Figura 12(/img/sprint1/0-diagrama-logico.png) 
+![Figura 13(/img/sprint1/0-diagrama-logico.png) 
+Haciendo lo anterior lo que hacemos que es que los log se cortan cada dia y guardamos solo los últimos 7 días y los comprimimos para ahorrar espacio 
+
 
 
 
