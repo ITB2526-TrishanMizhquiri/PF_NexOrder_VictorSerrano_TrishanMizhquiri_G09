@@ -1,0 +1,97 @@
+# Documentación Técnica – Infraestructura VPC Sprint 3
+
+**Proyecto:** NexOrder Infrastructure
+
+**Responsables:** Victor Serrano, Trishan Mizhquiri
+
+**Fecha:** 4 de mayo 2026 – 12 de mayo 2026
+
+**Módulos:** M0370 (Planificación de redes) · M0369 (Integración de ordenadores en red)
+
+---
+
+## 📋 Índice
+
+1. [Arquitectura de Red](#1-arquitectura-de-red)
+2. [TA01: VPC y Subredes](#2-ta01-vpc-y-subredes)
+   - [2.1 Creación de la VPC](#21-creación-de-la-vpc)
+   - [2.2 Subred Pública](#22-subred-pública)
+   - [2.3 Subred Privada](#23-subred-privada)
+   - [2.4 Validación de Subredes](#24-validación-de-subredes)
+3. [TA02: Internet Gateway y Enrutamiento](#3-ta02-internet-gateway-y-enrutamiento)
+   - [3.1 Internet Gateway (IGW)](#31-internet-gateway-igw)
+   - [3.2 Tablas de Enrutamiento](#32-tablas-de-enrutamiento)
+4. [TA03: Instancias EC2 y RDS](#4-ta03-instancias-ec2-y-rds)
+   - [4.1 Instancia EC2](#41-instancia-ec2)
+   - [4.2 Instancia RDS MySQL](#42-instancia-rds-mysql)
+   - [4.3 Conexión SSH Inicial](#43-conexión-ssh-inicial)
+   - [4.4 Prueba EC2 → RDS](#44-prueba-de-conexión-ec2--rds)
+5. [TA04: Security Groups](#5-ta04-security-groups)
+   - [5.1 SG-Web-NexOrder](#51-sg-web-nexorder)
+   - [5.2 SG-DB-NexOrder](#52-sg-db-nexorder)
+6. [TA05: Hardening del Sistema](#6-ta05-hardening-del-sistema)
+   - [6.1 Actualización de Paquetes](#61-actualización-de-paquetes)
+   - [6.2 Usuario Administrativo Restringido](#62-usuario-administrativo-restringido)
+   - [6.3 Hardening de SSH](#63-hardening-de-ssh)
+   - [6.4 Reinicio y Validación](#64-reinicio-y-validación-del-servicio)
+   - [6.5 Prueba con nexadmin](#65-prueba-con-usuario-nexadmin)
+7. [Verificación Final de Conectividad](#7-verificación-final-de-conectividad)
+8. [Justificación de Criterios](#8-justificación-de-criterios)
+9. [Leyenda de Imágenes](#9-leyenda-de-imágenes)
+
+---
+
+## 13. Desarrollar script backup automatizado
+
+Descripción: Crear backup.sh que ejecute mysqldump, comprima gzip, añada timestamp y almacene en /backups local.
+
+## Preparar entorno y permisos
+
+```bash
+# 1. Crear directorio de backups y log
+sudo mkdir -p /backups
+sudo touch /var/log/nexorder_backup.log
+
+# 2. Asignar propietario al usuario actual (ec2-user) para facilitar gestión
+sudo chown -R ec2-user:ec2-user /backups /var/log/nexorder_backup.log
+
+# 3. Permisos seguros (solo el propietario puede leer/escribir)
+chmod 700 /backups
+chmod 600 /var/log/nexorder_backup.log
+---
+![Figura 0](/img/sprint1/0-diagrama-logico.png) 
+
+##  Paso 2: Crear el script `backup_nexorder.sh`
+
+```bash
+# Crear el script en ruta estándar para administradores
+sudo nano /usr/local/bin/backup_nexorder.sh
+
+![Figura 1](/img/sprint1/0-diagrama-logico.png) 
+> 📸 **Figura 0 – Arquitectura lógica:** diagrama conceptual de la red
+
+---
+# Hacer el script ejecutable
+sudo chmod +x /usr/local/bin/backup_nexorder.sh
+```
+
+> ⚠️ **IMPORTANTE:** Antes de ejecutar, edita las líneas `DB_HOST`, `DB_PASS` y `DB_USER` con tus datos reales:
+> ```bash
+> sudo nano /usr/local/bin/backup_nexorder.sh
+> ```
+![Figura 2](/img/sprint1/0-diagrama-logico.png) 
+
+
+## Ejecutar prueba manual
+
+```bash
+# Ejecutar el script
+/usr/local/bin/backup_nexorder.sh
+
+# Verificar archivo generado
+ls -lh /backups/
+
+# Verificar log de auditoría
+tail -5 /var/log/nexorder_backup.log
+```
+
