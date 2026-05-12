@@ -41,7 +41,7 @@
 
 ---
 
-## 13. Desarrollar script backup automatizado
+## T13. Desarrollar script backup automatizado
 
 Descripción: Crear backup.sh que ejecute mysqldump, comprima gzip, añada timestamp y almacene en /backups local.
 
@@ -94,4 +94,3 @@ ls -lh /backups/
 # Verificar log de auditoría
 tail -5 /var/log/nexorder_backup.log
 ```
-
