@@ -155,5 +155,51 @@ Pega esta línea **al final del archivo**:
 ![Figura 7](/img/sprint1/0-diagrama-logico.png) 
 ![Figura 8(/img/sprint1/0-diagrama-logico.png) 
 
+## Guardar y verificar
+
+**Guardar el archivo:**
+**Verificar que se guardó correctamente:**
+```bash
+# Listar tareas cron del usuario actual
+crontab -l
+```
+![Figura 9(/img/sprint1/0-diagrama-logico.png) 
+
+## Prueba inmediata (recomendada)
+
+Para no esperar hasta las 03:00 AM, puedes probar el cron ejecutándolo manualmente o modificando temporalmente el horario:
+
+### Opción A: Ejecutar manualmente (más seguro)
+```bash
+# Ejecutar el script ahora mismo para probar
+/usr/local/bin/backup_nexorder.sh
+
+# Verificar que se generó un nuevo backup y se escribió en el log
+ls -lh /backups/ | tail -1
+tail -3 /var/log/nexorder_backup.log
+```
+### Opción B: Probar con cron cada minuto (solo para pruebas)
+```bash
+# 1. Editar crontab temporalmente
+crontab -e
+
+# 2. Cambiar la línea a (ejecutar cada minuto):
+* * * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1
+
+# 3. Guardar y esperar 1-2 minutos
+
+# 4. Verificar el log
+tail -5 /var/log/nexorder_backup.log
+
+# 5. Restaurar el horario original (03:00)
+crontab -e
+# Cambiar: * * * * *  →  0 3 * * *
+```
+![Figura 10(/img/sprint1/0-diagrama-logico.png) 
+![Figura 11(/img/sprint1/0-diagrama-logico.png) 
+
+
+
+
 
 
