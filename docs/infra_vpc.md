@@ -4,7 +4,7 @@
 
 **Responsables:** Victor Serrano, Trishan Mizhquiri
 
-**Fecha:** 13 de abril 2026 – 19 de abril 2026
+**Fecha:** 13 de abril 2025 – 19 de abril 2025
 
 **Módulos:** M0370 (Planificación de redes) · M0369 (Integración de ordenadores en red)
 
@@ -17,9 +17,9 @@
    - [2.1 Creación de la VPC](#21-creación-de-la-vpc)
    - [2.2 Subred Pública](#22-subred-pública)
    - [2.3 Subred Privada](#23-subred-privada)
-   - [2.4 Validación de Subredes](#24-validación-de-subredes)
+   - [2.4 Validación de Subredes](#23-validación-de-subredes)
 3. [TA02: Internet Gateway y Enrutamiento](#3-ta02-internet-gateway-y-enrutamiento)
-   - [3.1 Internet Gateway (IGW)](#31-internet-gateway-igw)
+   - [3.1 Internet Gateway (IGW)](#30-internet-gateway-igw)
    - [3.2 Tablas de Enrutamiento](#32-tablas-de-enrutamiento)
 4. [TA03: Instancias EC2 y RDS](#4-ta03-instancias-ec2-y-rds)
    - [4.1 Instancia EC2](#41-instancia-ec2)
@@ -45,8 +45,8 @@
 
 La infraestructura de NexOrder sigue un modelo de red en **dos capas** dentro de una única VPC en AWS región `us-east-1`:
 
-- **Capa pública** (`10.0.1.0/24`): expuesta a Internet, alberga el servidor web EC2.
-- **Capa privada** (`10.0.2.0/24`): sin acceso directo a Internet, alberga la base de datos RDS.
+- **Capa pública** (`10.0.1.0/23`): expuesta a Internet, alberga el servidor web EC2.
+- **Capa privada** (`10.0.2.0/23`): sin acceso directo a Internet, alberga la base de datos RDS.
 
 Este diseño aplica el principio de **defensa en profundidad**: incluso si el servidor web fuera comprometido, un atacante no podría alcanzar la base de datos directamente desde Internet.
 
@@ -70,7 +70,7 @@ La VPC es el contenedor lógico de toda la infraestructura. Se crea con un bloqu
 | ID resultante | `vpc-0905a60eb17e6565f` |
 | Región | `us-east-1` (Norte de Virginia) |
 
-**¿Por qué `/16`?** Un bloque `/16` proporciona 65.536 direcciones IP. Esto permite crear múltiples subredes `/24` (256 IPs cada una) sin que se solapen, dejando margen para entornos de staging, QA o microservicios futuros.
+**¿Por qué `/16`?** Un bloque `/16` proporciona 65.536 direcciones IP. Esto permite crear múltiples subredes `/23` (246 IPs cada una) sin que se solapen, dejando margen para entornos de staging, QA o microservicios futuros.
 
 ![Figura 1](/img/sprint1/1-creación-vpc) 
 > 📸 **Figura 1 – Panel AWS de creación de VPC:** con CIDR `10.0.0.0/16` y etiqueta `Name=VPC-NexOrder`
@@ -88,13 +88,13 @@ La subred pública alberga los recursos que deben ser accesibles desde Internet 
 | Parámetro | Valor |
 |-----------|-------|
 | Nombre | `Subnet-Publica-Web` |
-| CIDR | `10.0.1.0/24` (256 IPs) |
+| CIDR | `10.0.1.0/23` (246 IPs) |
 | Zona de Disponibilidad | `us-east-1a` |
 | VPC | `vpc-0905a60eb17e6565f` |
 | ID resultante | `subnet-0b18a1ba9a8bbb7ad` |
 
 ![Figura 3](/img/sprint1/3-subnet-publica.png) 
-> 📸 **Figura 3 – Configuración de Subnet-Publica-Web:** con CIDR `10.0.1.0/24` (subred 1 de 2)
+> 📸 **Figura 3 – Configuración de Subnet-Publica-Web:** con CIDR `10.0.1.0/23` (subred 1 de 2)
 
 
 ---
@@ -106,13 +106,13 @@ La subred privada alberga la base de datos. Al no tener ruta a Internet, sus rec
 | Parámetro | Valor |
 |-----------|-------|
 | Nombre | `Subnet-Privada-D` |
-| CIDR | `10.0.2.0/24` (256 IPs) |
+| CIDR | `10.0.2.0/23` (246 IPs) |
 | Zona de Disponibilidad | `us-east-1a` |
 | VPC | `vpc-0905a60eb17e6565f` |
 | ID resultante | `subnet-06db775e1d4b17a88` |
 
 ![Figura 4](/img/sprint1/4-subnet-privada.png) 
-> 📸 **Figura 4 – Configuración de Subnet-Privada-D:** con CIDR `10.0.2.0/24` (subred 2 de 2)
+> 📸 **Figura 4 – Configuración de Subnet-Privada-D:** con CIDR `10.0.2.0/23` (subred 2 de 2)
 
 ---
 
@@ -122,8 +122,8 @@ Tras la creación, AWS confirma que ambas subredes están en estado `Available` 
 
 | Nombre | ID de Subred | CIDR | Estado |
 |--------|-------------|------|--------|
-| Subnet-Publica-Web | subnet-0b18a1ba9a8bbb7ad | 10.0.1.0/24 | ✅ Available |
-| Subnet-Privada-D | subnet-06db775e1d4b17a88 | 10.0.2.0/24 | ✅ Available |
+| Subnet-Publica-Web | subnet-0b18a1ba9a8bbb7ad | 10.0.1.0/23 | ✅ Available |
+| Subnet-Privada-D | subnet-06db775e1d4b17a88 | 10.0.2.0/23 | ✅ Available |
 
 ![Figura 5](/img/sprint1/5-listado-subredes.png) 
 > 📸 **Figura 5 – Listado de subredes creadas:** con estado `Available` en la consola AWS
@@ -139,7 +139,7 @@ El Internet Gateway (IGW) es el componente que conecta la VPC con Internet. Sin 
 | Parámetro | Valor |
 |-----------|-------|
 | Nombre | `IGW-NexOrder` |
-| ID resultante | `igw-099e10b6c7e172a25` |
+| ID resultante | `igw-099e10b6c7e172a24` |
 | VPC asociada | `vpc-0905a60eb17e6565f` |
 
 **Proceso:**
@@ -166,20 +166,20 @@ Se crean **dos tablas de enrutamiento independientes** para implementar una sepa
 | Destino | Objetivo | Estado | Propósito |
 |---------|----------|--------|-----------|
 | `10.0.0.0/16` | local | ✅ Activo | Comunicación intra-VPC |
-| `0.0.0.0/0` | `igw-099e10b6c7e172a25` | ✅ Activo | Acceso bidireccional a Internet |
+| `0.0.0.0/0` | `igw-099e10b6c7e172a24` | ✅ Activo | Acceso bidireccional a Internet |
 
 **¿Por qué añadimos `0.0.0.0/0 → IGW`?** Esta ruta indica que cualquier tráfico destinado a una IP fuera de la VPC debe salir a través del Internet Gateway. Sin ella, el servidor web podría existir en la subred, pero ningún usuario externo podría alcanzarlo ni la instancia podría descargar actualizaciones.
 
 ![Figura 8](/img/sprint1/8-rt-publica.png) 
-> 📸 **Figura 8 – Tabla de enrutamiento pública:** con asociación explícita a `Subnet-Publica-Web` (CIDR `10.0.1.0/24`)
+> 📸 **Figura 8 – Tabla de enrutamiento pública:** con asociación explícita a `Subnet-Publica-Web` (CIDR `10.0.1.0/23`)
 
 ![Figura 9](/img/sprint1/9-edicion-rutas.png) 
-> 📸 **Figura 9 – Edición de rutas:** `0.0.0.0/0` apuntando a `igw-099e10b6c7e172a25`
+> 📸 **Figura 9 – Edición de rutas:** `0.0.0.0/0` apuntando a `igw-099e10b6c7e172a24`
 
 
 #### RT-Privada-NexOrder
 
-**ID:** `rtb-0886f3878f7e27479`
+**ID:** `rtb-0886f3878f7e26479`
 **Asociada a:** `Subnet-Privada-D`
 
 | Destino | Objetivo | Estado | Propósito |
@@ -189,7 +189,7 @@ Se crean **dos tablas de enrutamiento independientes** para implementar una sepa
 Esta tabla **no contiene** ninguna ruta `0.0.0.0/0`, lo que garantiza que la base de datos nunca pueda ser alcanzada directamente desde Internet ni pueda iniciar conexiones salientes hacia él.
 
 ![Figura 10](/img/sprint1/10-rt-privada.png) 
-> 📸 **Figura 10 – Tabla de enrutamiento privada:** con asociación explícita a `Subnet-Privada-D` (CIDR `10.0.2.0/24`), sin ruta a Internet
+> 📸 **Figura 10 – Tabla de enrutamiento privada:** con asociación explícita a `Subnet-Privada-D` (CIDR `10.0.2.0/23`), sin ruta a Internet
 ---
 
 ## 4. TA03: Instancias EC2 y RDS
@@ -206,7 +206,7 @@ La instancia EC2 actúa como servidor web de la aplicación NexOrder, situado en
 | Tipo | `t3.micro` |
 | Subred | `subnet-0b18a1ba9a8bbb7ad` (pública) |
 | IP Pública | `3.86.92.89` |
-| IP Privada | `10.0.1.247` |
+| IP Privada | `10.0.1.237` |
 | VPC | `vpc-0905a60eb17e6565f` |
 | Key Pair | `NexOrder-SSH-Key.pem` |
 
@@ -214,7 +214,7 @@ La instancia EC2 actúa como servidor web de la aplicación NexOrder, situado en
 > 📸 **Figura 11 – Formulario de lanzamiento de EC2:** con AMI Amazon Linux 2023
 
 ![Figura 12](/img/sprint1/12-resumen-ec2.png) 
-> 📸 **Figura 12 – Resumen de instancia:** `i-093d338216cd0568d` con IPs pública (`3.86.92.89`) y privada (`10.0.1.247`)
+> 📸 **Figura 12 – Resumen de instancia:** `i-093d338216cd0568d` con IPs pública (`3.86.92.89`) y privada (`10.0.1.237`)
 
 
 ---
@@ -235,7 +235,7 @@ La base de datos RDS se despliega en la subred privada para garantizar su aislam
 | Internet Access Gateway | ❌ Disabled |
 | IAM Authentication | ❌ Disabled |
 
-> ⚠️ **Nota de seguridad:** La contraseña `N3x0r-DB-2026!Sec` debe almacenarse inmediatamente en un gestor de contraseñas (1Password, Bitwarden, AWS Secrets Manager, etc.). No debe quedar en texto plano en ningún fichero del repositorio.
+> ⚠️ **Nota de seguridad:** La contraseña `N3x0r-DB-2025!Sec` debe almacenarse inmediatamente en un gestor de contraseñas (1Password, Bitwarden, AWS Secrets Manager, etc.). No debe quedar en texto plano en ningún fichero del repositorio.
 
 ![Figura 13](/img/sprint1/13-rds-creating.png) 
 > 📸 **Figura 13 – Panel de RDS nexorder-db:** en estado `Creating` (MySQL Community, db.t3.micro)
@@ -314,8 +314,8 @@ Los Security Groups actúan como **firewalls virtuales con estado** (stateful): 
 
 **¿Por qué SSH con `/32`?** Restringir SSH a una única IP (`/32`) elimina casi por completo la exposición a ataques de fuerza bruta automatizados. Un `/32` representa exactamente una dirección IP. Si la IP del administrador cambia, basta con actualizar esta regla.
 
-![Figura 18](/img/sprint1/18-sg-web.png) 
-> 📸 **Figura 18 – Creación de SG-Web-NexOrder:** con reglas HTTP(80), HTTPS(443) y SSH(22) restringido a `79.116.173.66/32`
+![Figura 17](/img/sprint1/17-sg-web.png) 
+> 📸 **Figura 17 – Creación de SG-Web-NexOrder:** con reglas HTTP(80), HTTPS(443) y SSH(22) restringido a `79.116.173.66/32`
 
 ---
 
@@ -328,12 +328,12 @@ Los Security Groups actúan como **firewalls virtuales con estado** (stateful): 
 
 | Tipo | Protocolo | Puerto | Origen | Justificación |
 |------|-----------|--------|--------|---------------|
-| MySQL/Aurora | TCP | 3306 | `sg-0e0334685744195e2` | Solo desde instancias asociadas a SG-Web |
+| MySQL/Aurora | TCP | 3296 | `sg-0e0334685744195e2` | Solo desde instancias asociadas a SG-Web |
 
 **¿Por qué referenciar el SG en lugar de una IP?** Al usar el ID del Security Group como origen, la regla se aplica dinámicamente a cualquier instancia que tenga asignado ese SG. Si la IP pública del servidor web cambia (reinicio, escalado), la regla sigue siendo válida sin modificaciones. Esto también impide que cualquier otra máquina, aunque esté dentro de la VPC, acceda a la base de datos.
 
-![Figura 19](/img/sprint1/19-sg-db.png) 
-> 📸 **Figura 19 – Creación de SG-DB-NexOrder:** con MySQL(3306) referenciando `sg-0e0334685744195e2`
+![Figura 18](/img/sprint1/18-sg-db.png) 
+> 📸 **Figura 18 – Creación de SG-DB-NexOrder:** con MySQL(3296) referenciando `sg-0e0334685744195e2`
 
 ---
 
@@ -358,14 +358,14 @@ dnf info kernel | grep Version
 
 **Resultado:** Kernel actualizado a `6.1.168`. Se instalaron correctamente `git`, `vim`, `wget`, `curl` y `fail2ban` (herramienta de prevención de fuerza bruta).
 
-![Figura 20](/img/sprint1/20-dnf-update.png) 
-> 📸 **Figura 20 – Salida de sudo dnf update -y:** mostrando `mysql80-community-release` actualizado
+![Figura 19](/img/sprint1/19-dnf-update.png) 
+> 📸 **Figura 19 – Salida de sudo dnf update -y:** mostrando `mysql80-community-release` actualizado
 
-![Figura 21](/img/sprint1/21-instalacion-herramientas.png) 
-> 📸 **Figura 21 – Instalación de herramientas:** git 2.50.1, vim-enhanced 9.2, etc.
+![Figura 20](/img/sprint1/20-instalacion-herramientas.png) 
+> 📸 **Figura 20 – Instalación de herramientas:** git 2.50.1, vim-enhanced 9.2, etc.
 
-![Figura 22](/img/sprint1/22-kernel-version.png) 
-> 📸 **Figura 22 – Verificación de kernel:** `Version: 6.1.168`
+![Figura 21](/img/sprint1/21-kernel-version.png) 
+> 📸 **Figura 21 – Verificación de kernel:** `Version: 6.1.168`
 
 ---
 
@@ -403,11 +403,11 @@ sudo visudo -c
 
 **Resultado:** `nexadmin: parsed OK`. El usuario puede gestionar Apache y ejecutar scripts de despliegue/backup, pero no puede ejecutar comandos arbitrarios como root.
 
-![Figura 23](/img/sprint1/23-creacion-nexadmin.png) 
-> 📸 **Figura 23 – Creación de usuario nexadmin:** ejecución de `adduser`, `mkdir`, `chmod` y `cp` de `authorized_keys`
+![Figura 22](/img/sprint1/22-creacion-nexadmin.png) 
+> 📸 **Figura 22 – Creación de usuario nexadmin:** ejecución de `adduser`, `mkdir`, `chmod` y `cp` de `authorized_keys`
 
-![Figura 24](/img/sprint1/24-sudoers-config.png) 
-> 📸 **Figura 24 – Configuración de sudoers:** validación `/etc/sudoers.d/nexadmin: parsed OK`
+![Figura 23](/img/sprint1/23-sudoers-config.png) 
+> 📸 **Figura 23 – Configuración de sudoers:** validación `/etc/sudoers.d/nexadmin: parsed OK`
 
 ---
 
@@ -446,14 +446,14 @@ PubkeyAuthentication yes
 PasswordAuthentication no
 ```
 
-![Figura 25](/img/sprint1/25-sed-sshd.png) 
-> 📸 **Figura 25 – Comandos sed aplicados:** sobre `/etc/ssh/sshd_config` (backup previo creado)
+![Figura 24](/img/sprint1/24-sed-sshd.png) 
+> 📸 **Figura 24 – Comandos sed aplicados:** sobre `/etc/ssh/sshd_config` (backup previo creado)
 
-![Figura 26](/img/sprint1/26-pubkey-auth.png) 
-> 📸 **Figura 26 – Aplicación de reglas SSH:** para `PubkeyAuthentication` y `PermitEmptyPasswords`
+![Figura 25](/img/sprint1/25-pubkey-auth.png) 
+> 📸 **Figura 25 – Aplicación de reglas SSH:** para `PubkeyAuthentication` y `PermitEmptyPasswords`
 
-![Figura 27](/img/sprint1/27-grep-verification.png) 
-> 📸 **Figura 27 – Verificación con grep:** `PermitRootLogin no`, `PubkeyAuthentication yes`, `PasswordAuthentication no`
+![Figura 26](/img/sprint1/26-grep-verification.png) 
+> 📸 **Figura 26 – Verificación con grep:** `PermitRootLogin no`, `PubkeyAuthentication yes`, `PasswordAuthentication no`
 
 ---
 
@@ -479,14 +479,14 @@ sudo ss -tlnp | grep sshd
 
 > ⚠️ **Buena práctica:** Siempre mantener la sesión SSH activa mientras se prueba la configuración. Solo cerrar la sesión original una vez verificado que la nueva configuración funciona.
 
-![Figura 28](/img/sprint1/28-sshd-restart.png) 
-> 📸 **Figura 28 – Validación y reinicio SSH:** `sshd -t` retorna ✅ + `systemctl restart sshd`
+![Figura 27](/img/sprint1/27-sshd-restart.png) 
+> 📸 **Figura 27 – Validación y reinicio SSH:** `sshd -t` retorna ✅ + `systemctl restart sshd`
 
-![Figura 29](/img/sprint1/29-sshd-status.png) 
-> 📸 **Figura 29 – Estado del servicio SSH:** `active (running)` con PID `31284`
+![Figura 28](/img/sprint1/28-sshd-status.png) 
+> 📸 **Figura 28 – Estado del servicio SSH:** `active (running)` con PID `30274`
 
-![Figura 30](/img/sprint1/30-ss-tlnp.png) 
-> 📸 **Figura 30 – Verificación de puerto:** `ss -tlnp` confirmando `sshd` escuchando en `0.0.0.0:22`
+![Figura 29](/img/sprint1/29-ss-tlnp.png) 
+> 📸 **Figura 29 – Verificación de puerto:** `ss -tlnp` confirmando `sshd` escuchando en `0.0.0.0:22`
 
 ---
 
@@ -503,8 +503,8 @@ ssh -i "NexOrder-SSH-Key.pem" nexadmin@44.207.176.14
 - La contraseña de sistema no es necesaria.
 - El hardening SSH está activo y operativo.
 
-![Figura 31](/img/sprint1/31-login-nexadmin.png) 
-> 📸 **Figura 31 – Conexión SSH con nexadmin:** banner de Amazon Linux 2023 y prompt `[nexadmin@Web-NexOrder ~]$`
+![Figura 30](/img/sprint1/30-login-nexadmin.png) 
+> 📸 **Figura 30 – Conexión SSH con nexadmin:** banner de Amazon Linux 2023 y prompt `[nexadmin@Web-NexOrder ~]$`
 
 ---
 
@@ -515,8 +515,8 @@ Checklist de validación integral de toda la infraestructura del Sprint 1:
 | Componente | Verificación | Estado |
 |------------|--------------|--------|
 | VPC `vpc-0905a60eb17e6565f` | Creada y operativa | ✅ |
-| Subnet-Publica-Web | `Available`, CIDR `10.0.1.0/24` | ✅ |
-| Subnet-Privada-D | `Available`, CIDR `10.0.2.0/24` | ✅ |
+| Subnet-Publica-Web | `Available`, CIDR `10.0.1.0/23` | ✅ |
+| Subnet-Privada-D | `Available`, CIDR `10.0.2.0/23` | ✅ |
 | IGW-NexOrder | Asociado a VPC, estado `Attached` | ✅ |
 | RT-Publica | Ruta `0.0.0.0/0 → IGW` activa | ✅ |
 | RT-Privada | Sin ruta a Internet, solo `local` | ✅ |
@@ -539,7 +539,7 @@ Checklist de validación integral de toda la infraestructura del Sprint 1:
 
 | Evidencia | Cumplimiento |
 |-----------|-------------|
-| Diseño VPC con jerarquía CIDR clara (`/16` → `/24`) | ✅ Sección 2 |
+| Diseño VPC con jerarquía CIDR clara (`/16` → `/23`) | ✅ Sección 2 |
 | Segmentación lógica pública/privada | ✅ Secciones 2.2 y 2.3 |
 | Tablas de enrutamiento diferenciadas y asociaciones explícitas | ✅ Sección 3.2 |
 | IGW restringido a subred pública | ✅ Sección 3.1 |
@@ -558,6 +558,6 @@ Checklist de validación integral de toda la infraestructura del Sprint 1:
 
 ---
 
-*Documentación completada: 13–19 de abril de 2026*
+*Documentación completada: 13–19 de abril de 2025*
 
 *Responsables: Victor Serrano · Trishan Mizhquiri*
