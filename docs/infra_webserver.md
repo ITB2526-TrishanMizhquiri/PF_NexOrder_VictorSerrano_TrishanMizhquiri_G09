@@ -185,6 +185,7 @@ Se crea un archivo de configuración dedicado para separar la configuración SSL
 ```bash
 sudo nano /etc/httpd/conf.d/nexorder-ssl.conf
 ```
+[Enllaç al documento: Configuración de Nexorder-ssl.conf](/docs/src/nexorder-ssl.conf)
 
 **¿Qué hace cada directiva?**
 
@@ -317,7 +318,8 @@ Fail2ban lee su configuración de `/etc/fail2ban/jail.conf` (defaults) pero se s
 sudo nano /etc/fail2ban/jail.local
 ```
 
-**Explicación de cada parámetro:**
+[Enllaç al documento: Configuración de Jail](/docs/src/jail.local)
+
 
 | Parámetro | Valor | Significado |
 |-----------|-------|-------------|
@@ -477,6 +479,8 @@ Con el usuario `admin`, se crea y ejecuta el esquema completo de la aplicación:
 # Crear el archivo del esquema
 sudo nano nexorder_schema.sql
 
+[Enllaç al documento: Configuración de Nexorder_schema.sql](/docs/src/nexorder_schema.sql)
+
 # Ejecutar el script contra RDS
 mysql -h nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com \
   -u admin -p \
@@ -604,6 +608,7 @@ sudo chmod 644 *.php
 
 Archivo de prueba de conectividad que valida la conexión PDO a RDS con manejo de errores completo:
 
+[Enllaç al documento: Connexio.php](/docs/src/connexio.php)
 
 **Prácticas de seguridad aplicadas:**
 - `ATTR_EMULATE_PREPARES => false`: fuerza el uso de sentencias preparadas reales en el servidor MySQL, lo que previene inyecciones SQL (el driver no construye el SQL en el cliente).
@@ -617,12 +622,16 @@ Archivo de prueba de conectividad que valida la conexión PDO a RDS con manejo d
 
 Página de menú estático con badges de estado y enlaces a los archivos de validación. Incluye el badge `HTTPS Activo` que confirma visualmente que el certificado SSL está activo.
 
+[Enllaç al documento: Index.php](/docs/src/index.php)
+
 ![Figura 38](/img/sprint2/38-index-php.png)
 > 📸 **Figura 38** – Editor nano con el contenido completo de `index.php` (HTML con badge `HTTPS Activo` y tarjetas de características)
 
 #### `panel.php` — Panel de estado y consulta segura
 
 Panel de validación funcional que ejecuta una consulta PDO segura para mostrar la versión de MySQL, el usuario conectado y la base de datos activa:
+
+[Enllaç al documento: Panel.php](/docs/src/panel.php)
 
 ![Figura 39](/img/sprint2/39-panel-php.png)
 > 📸 **Figura 39** – Editor nano con el contenido completo de `panel.php` incluyendo la conexión PDO y la tabla HTML de estado

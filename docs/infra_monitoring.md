@@ -37,7 +37,6 @@
    - [6.5 Prueba con nexadmin](#65-prueba-con-usuario-nexadmin)
 7. [Verificación Final de Conectividad](#7-verificación-final-de-conectividad)
 8. [Justificación de Criterios](#8-justificación-de-criterios)
-9. [Leyenda de Imágenes](#9-leyenda-de-imágenes)
 
 ---
 

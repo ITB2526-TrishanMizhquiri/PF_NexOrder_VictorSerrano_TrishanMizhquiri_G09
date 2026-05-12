@@ -112,10 +112,10 @@ Desplegar infraestructura cloud básica en AWS: VPC con subredes pública/privad
 ### 6.1 Estat inicial de la planificació (ProofHub)
 A continuació es mostra el tauler de gestió amb totes les tasques creades i assignades abans de l'inici de les execucions:
 
-![ProofHub - Tasques inicials](/img/sprint1/proofhub-inicial-1.png)
-![ProofHub - Tasques inicials](/img/sprint1/proofhub-inicial-2.png)
-![ProofHub - Tasques inicials](/img/sprint1/proofhub-inicial-3.png)
-![ProofHub - Tasques inicials](/img/sprint1/proofhub-inicial-4.png)
+![ProofHub - Tasques inicials](/img/sprint1/proofhub/proofhub-inicial-1.png)
+![ProofHub - Tasques inicials](/img/sprint1/proofhub/proofhub-inicial-2.png)
+![ProofHub - Tasques inicials](/img/sprint1/proofhub/proofhub-inicial-3.png)
+![ProofHub - Tasques inicials](/img/sprint1/proofhub/proofhub-inicial-4.png)
 
 > 📸 **Figura 6.1:** Estat inicial del tauler ProofHub amb tasques TA00-TA06 en estat "Per fer" o "En curs"
 
@@ -124,9 +124,9 @@ A continuació es mostra el tauler de gestió amb totes les tasques creades i as
 ### 6.2 Avanços intermedis (14 d'abril)
 Estat del projecte a mitjan sprint, amb les tasques de configuració de xarxa i provisionament en procés de validació.
 
-![ProofHub - Tasques finalitzades Setmana 1](/img/sprint1/proofhub-14abril-1.png)
-![ProofHub - Tasques finalitzades Setmana 1](/img/sprint1/proofhub-14abril-2.png)
-![ProofHub - Tasques finalitzades Setmana 1](/img/sprint1/proofhub-14abril-3.png)
+![ProofHub - Tasques finalitzades Setmana 1](/img/sprint1/proofhub/proofhub-14abril-1.png)
+![ProofHub - Tasques finalitzades Setmana 1](/img/sprint1/proofhub/proofhub-14abril-2.png)
+![ProofHub - Tasques finalitzades Setmana 1](/img/sprint1/proofhub/proofhub-14abril-3.png)
 
 > 📸 **Figura 6.2:** Avanç a 14 d'abril. TA01 i TA02 completades, TA03 en execució.
 
@@ -135,9 +135,9 @@ Estat del projecte a mitjan sprint, amb les tasques de configuració de xarxa i 
 ### 6.3 Finalització del Sprint
 Tauler completat amb totes les tasques TA01-TA06 marcades com a completades i evidències adjuntes.
 
-![ProofHub - Tasques finalitzades](/img/sprint1/proofhub-final-1.png)
-![ProofHub - Tasques finalitzades](/img/sprint1/proofhub-final-2.png)
-![ProofHub - Tasques finalitzades](/img/sprint1/proofhub-final-3.png)
+![ProofHub - Tasques finalitzades](/img/sprint1/proofhub/proofhub-final-1.png)
+![ProofHub - Tasques finalitzades](/img/sprint1/proofhub/proofhub-final-2.png)
+![ProofHub - Tasques finalitzades](/img/sprint1/proofhub/proofhub-final-3.png)
 
 > 📸 **Figura 6.3:** Sprint 1 tancat. Totes les tasques a "Completat" amb entregables validats.
 

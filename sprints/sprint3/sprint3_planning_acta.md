@@ -39,8 +39,8 @@ Implementar automatización de backups lógicos, rotación de logs, monitorizaci
 | T14 | Configurar cron ejecución programada | Instalación `cronie`, programación `0 3 * * *`, redirección `2>&1` a log de auditoría | Trishan | 1.5h | T13 |
 | T15 | Implementar rotación de logs | Configurar `logrotate` para `httpd` y `mysql` (daily, rotate 7, compress, postrotate) | Victor | 1.5h | EC2 (S1) |
 | T16 | CloudWatch y alertas proactivas | Alarma CPU >80% (periodo 1 min), tema SNS email, Dashboard con métricas EBS Read/Write | Victor | 3h | EC2 (S1) |
-| T17 | Script despliegue continuo | `deploy_nexorder.sh` con `rsync -avz --delete` (staging→prod), `reload httpd`, log auditoría | Ambos | 2.5h | Web (S2) |
-| T18 | Prueba restauración backup | Simular `DROP DB`, restaurar `gunzip \| mysql` (filtrando `SET@@`), verificar integridad, medir RTO | Ambos | 2h | T13, T14 |
+| T17 | Script despliegue continuo | `deploy_nexorder.sh` con `rsync -avz --delete` (staging→prod), `reload httpd`, log auditoría | Trishan | 2.5h | Web (S2) |
+| T18 | Prueba restauración backup | Simular `DROP DB`, restaurar `gunzip \| mysql` (filtrando `SET@@`), verificar integridad, medir RTO | Trishan | 2h | T13, T14 |
 | T19 | Auditoría de Seguridad | Escaneo `nmap -sV` desde Kali para validar puertos expuestos, versiones y latencia | Victor | 0.5h | SG (S1) |
 
 **Total esfuerzo estimado:** 14 horas
@@ -111,9 +111,9 @@ Implementar automatización de backups lógicos, rotación de logs, monitorizaci
 ### 6.1 Estat inicial de la planificació (ProofHub)
 A continuació es mostra el tauler de gestió amb totes les tasques T13-T19 creades i assignades abans de l'inici de les execucions:
 
-![ProofHub - Tasques inicials S3](/img/sprint3/proofhub-inicial-1.png)
-![ProofHub - Tasques inicials S3](/img/sprint3/proofhub-inicial-2.png)
-![ProofHub - Tasques inicials S3](/img/sprint3/proofhub-inicial-3.png)
+![ProofHub - Tasques inicials S3](/img/sprint3/proofhub/proofhub-inicial-1.png)
+![ProofHub - Tasques inicials S3](/img/sprint3/proofhub/proofhub-inicial-2.png)
+![ProofHub - Tasques inicials S3](/img/sprint3/proofhub/proofhub-inicial-3.png)
 
 > 📸 **Figura 6.1:** Estat inicial del tauler ProofHub amb tasques T13-T19 en estat "Per fer".
 
@@ -122,9 +122,9 @@ A continuació es mostra el tauler de gestió amb totes les tasques T13-T19 crea
 ### 6.2 Avanços intermedis (30 d'abril)
 Estat del projecte a mitjan sprint, amb la configuració de backups, cron, logrotate i CloudWatch en procés de validació.
 
-![ProofHub - Tasques en curs S3](/img/sprint3/proofhub-30abril-1.png)
-![ProofHub - Tasques en curs S3](/img/sprint3/proofhub-30abril-2.png)
-![ProofHub - Tasques en curs S3](/img/sprint3/proofhub-30abril-3.png)
+![ProofHub - Tasques en curs S3](/img/sprint3/proofhub/proofhub-30abril-1.png)
+![ProofHub - Tasques en curs S3](/img/sprint3/proofhub/proofhub-30abril-2.png)
+![ProofHub - Tasques en curs S3](/img/sprint3/proofhub/proofhub-30abril-3.png)
 
 > 📸 **Figura 6.2:** Avanç a 30 d'abril. T13, T14, T15 completades, T16 i T17 en execució.
 
@@ -133,9 +133,9 @@ Estat del projecte a mitjan sprint, amb la configuració de backups, cron, logro
 ### 6.3 Finalització del Sprint
 Tauler completat amb totes les tasques T13-T19 marcades com a completades i evidències de monitorització, DR i auditoria adjuntes.
 
-![ProofHub - Tasques finalitzades S3](/img/sprint3/proofhub-final-1.png)
-![ProofHub - Tasques finalitzades S3](/img/sprint3/proofhub-final-2.png)
-![ProofHub - Tasques finalitzades S3](/img/sprint3/proofhub-final-3.png)
+![ProofHub - Tasques finalitzades S3](/img/sprint3/proofhub/proofhub-final-1.png)
+![ProofHub - Tasques finalitzades S3](/img/sprint3/proofhub/proofhub-final-2.png)
+![ProofHub - Tasques finalitzades S3](/img/sprint3/proofhub/proofhub-final-3.png)
 
 > 📸 **Figura 6.3:** Sprint 3 tancat. Totes les tasques a "Completat" amb resiliència i monitorització validades.
 

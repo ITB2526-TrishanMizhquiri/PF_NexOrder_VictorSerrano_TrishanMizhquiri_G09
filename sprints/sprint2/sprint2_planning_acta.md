@@ -111,9 +111,9 @@ Desplegar servicios de red y seguridad sobre la infraestructura existente: insta
 ### 6.1 Estat inicial de la planificació (ProofHub)
 A continuació es mostra el tauler de gestió amb totes les tasques T07-T12 creades i assignades abans de l'inici de les execucions:
 
-![ProofHub - Tasques inicials S2](/img/sprint2/proofhub-inicial-1.png)
-![ProofHub - Tasques inicials S2](/img/sprint2/proofhub-inicial-2.png)
-![ProofHub - Tasques inicials S2](/img/sprint2/proofhub-inicial-3.png)
+![ProofHub - Tasques inicials S2](/img/sprint2/proofhub/proofhub-inicial-1.png)
+![ProofHub - Tasques inicials S2](/img/sprint2/proofhub/proofhub-inicial-2.png)
+![ProofHub - Tasques inicials S2](/img/sprint2/proofhub/proofhub-inicial-3.png)
 
 > 📸 **Figura 6.1:** Estat inicial del tauler ProofHub amb tasques T07-T12 en estat "Per fer".
 
@@ -122,9 +122,9 @@ A continuació es mostra el tauler de gestió amb totes les tasques T07-T12 crea
 ### 6.2 Avanços intermedis (21 d'abril)
 Estat del projecte a mitjan sprint, amb la configuració del servidor web, SSL i Fail2ban en procés de validació.
 
-![ProofHub - Tasques en curs S2](/img/sprint2/proofhub-21abril-1.png)
-![ProofHub - Tasques en curs S2](/img/sprint2/proofhub-21abril-2.png)
-![ProofHub - Tasques en curs S2](/img/sprint2/proofhub-21abril-3.png)
+![ProofHub - Tasques en curs S2](/img/sprint2/proofhub/proofhub-21abril-1.png)
+![ProofHub - Tasques en curs S2](/img/sprint2/proofhub/proofhub-21abril-2.png)
+![ProofHub - Tasques en curs S2](/img/sprint2/proofhub/proofhub-21abril-3.png)
 
 > 📸 **Figura 6.2:** Avanç a 22 d'abril. T07, T08 i T09 completades, T10 i T11 en execució.
 
@@ -133,9 +133,9 @@ Estat del projecte a mitjan sprint, amb la configuració del servidor web, SSL i
 ### 6.3 Finalització del Sprint
 Tauler completat amb totes les tasques T07-T12 marcades com a completades i evidències de validació web i DB adjuntes.
 
-![ProofHub - Tasques finalitzades S2](/img/sprint2/proofhub-final-1.png)
-![ProofHub - Tasques finalitzades S2](/img/sprint2/proofhub-final-2.png)
-![ProofHub - Tasques finalitzades S2](/img/sprint2/proofhub-final-3.png)
+![ProofHub - Tasques finalitzades S2](/img/sprint2/proofhub/proofhub-final-1.png)
+![ProofHub - Tasques finalitzades S2](/img/sprint2/proofhub/proofhub-final-2.png)
+![ProofHub - Tasques finalitzades S2](/img/sprint2/proofhub/proofhub-final-3.png)
 
 > 📸 **Figura 6.3:** Sprint 2 tancat. Totes les tasques a "Completat" amb servidor web segur i validat.
 
