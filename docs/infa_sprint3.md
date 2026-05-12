@@ -198,9 +198,8 @@ crontab -e
 ![Figura 10(/img/sprint1/0-diagrama-logico.png) 
 ![Figura 11(/img/sprint1/0-diagrama-logico.png) 
 
----
 > *"Se ha configurado una tarea cron (`0 3 * * *`) para ejecutar el script de backup diariamente a las 03:00, horario de baja actividad que minimiza el impacto en el rendimiento del sistema. La salida del script se redirige a `/var/log/nexorder_backup.log` con `2>&1` para capturar tanto stdout como stderr, garantizando auditoría completa de cada ejecución. Los permisos `664` en el log permiten escritura por el usuario del cron mientras mantienen lectura para administración y revisión. El script utiliza rutas absolutas para evitar fallos en entornos no interactivos de cron.
----
+
 ### T15: Implementar rotación de logs (logrotate)
 Añadimos en el archivo sudo nano /etc/logrotate.d/httpd  y eliminamos el que había ya que si no va a salir un error de entrada duplicada 
 ![Figura 12(/img/sprint1/0-diagrama-logico.png) 
