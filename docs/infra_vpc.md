@@ -72,7 +72,7 @@ La VPC es el contenedor lógico de toda la infraestructura. Se crea con un bloqu
 
 **¿Por qué `/16`?** Un bloque `/16` proporciona 65.536 direcciones IP. Esto permite crear múltiples subredes `/23` (246 IPs cada una) sin que se solapen, dejando margen para entornos de staging, QA o microservicios futuros.
 
-![Figura 1](/img/sprint1/1-creación-vpc) 
+![Figura 1](/img/sprint1/1-creación-vpc.png) 
 > 📸 **Figura 1 – Panel AWS de creación de VPC:** con CIDR `10.0.0.0/16` y etiqueta `Name=VPC-NexOrder`
 
 ![Figura 2](/img/sprint1/2-formulario-vpc.png) 
