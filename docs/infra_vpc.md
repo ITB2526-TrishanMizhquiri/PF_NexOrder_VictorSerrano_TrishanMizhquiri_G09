@@ -17,9 +17,9 @@
    - [2.1 Creación de la VPC](#21-creación-de-la-vpc)
    - [2.2 Subred Pública](#22-subred-pública)
    - [2.3 Subred Privada](#23-subred-privada)
-   - [2.4 Validación de Subredes](#23-validación-de-subredes)
+   - [2.4 Validación de Subredes](#24-validación-de-subredes)
 3. [TA02: Internet Gateway y Enrutamiento](#3-ta02-internet-gateway-y-enrutamiento)
-   - [3.1 Internet Gateway (IGW)](#30-internet-gateway-igw)
+   - [3.1 Internet Gateway (IGW)](#31-internet-gateway-igw)
    - [3.2 Tablas de Enrutamiento](#32-tablas-de-enrutamiento)
 4. [TA03: Instancias EC2 y RDS](#4-ta03-instancias-ec2-y-rds)
    - [4.1 Instancia EC2](#41-instancia-ec2)
@@ -37,7 +37,6 @@
    - [6.5 Prueba con nexadmin](#65-prueba-con-usuario-nexadmin)
 7. [Verificación Final de Conectividad](#7-verificación-final-de-conectividad)
 8. [Justificación de Criterios](#8-justificación-de-criterios)
-9. [Leyenda de Imágenes](#9-leyenda-de-imágenes)
 
 ---
 
