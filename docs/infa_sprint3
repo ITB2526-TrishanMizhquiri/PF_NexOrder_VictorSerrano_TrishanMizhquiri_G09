@@ -94,3 +94,66 @@ ls -lh /backups/
 # Verificar log de auditoría
 tail -5 /var/log/nexorder_backup.log
 ```
+![Figura 3](/img/sprint1/0-diagrama-logico.png) 
+
+##  Justificación Técnica ASIXc
+ *"Se ha desarrollado un script Bash (`backup_nexorder.sh`) que automatiza la exportación lógica de la base de datos MySQL mediante `mysqldump`, aplicando compresión `gzip` para optimizar espacio y añadiendo un timestamp para versionado. El script incluye control de errores (`$?`), registro de auditoría en `/var/log/` y política de retención de 7 días mediante `find -mtime`.
+
+## T14. - Configurar cron ejecución programada
+Descripción: Programar tarea cron diaria 03:00, verificar permisos y redirigir salida a log auditoría.
+## 🔧 Paso 1: Verificar permisos del log
+
+Antes de configurar cron, asegúrate de que el usuario pueda escribir en el log:
+
+```bash
+# Verificar propietario y permisos actuales
+ls -l /var/log/nexorder_backup.log
+
+# Si es necesario, ajustar permisos (el usuario del cron debe poder escribir)
+sudo chown ec2-user:ec2-user /var/log/nexorder_backup.log
+sudo chmod 664 /var/log/nexorder_backup.log
+```
+![Figura 3](/img/sprint1/0-diagrama-logico.png) 
+ El archivo debe ser writable por `ec2-user`.
+
+---
+
+## Pasos para instalar y activar CRON
+
+### Instalar el paquete correcto
+```bash
+sudo dnf install cronie -y
+```
+![Figura 5](/img/sprint1/0-diagrama-logico.png) 
+### Habilitar e iniciar el servicio
+```bash
+# Habilitar para que arranque con el sistema
+sudo systemctl enable crond
+
+# Iniciar el servicio ahora
+sudo systemctl start crond
+
+# Verificar estado
+sudo systemctl status crond 
+```
+![Figura 6](/img/sprint1/0-diagrama-logico.png) 
+
+## Editar crontab
+
+```bash
+# Editar la tabla cron del usuario actual (ec2-user)
+crontab -e
+```
+## Añadir la tarea programada
+
+Pega esta línea **al final del archivo**:
+
+```cron
+# Backup diario NexOrder - 03:00 AM (T14)
+0 3 * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1
+```
+![Figura 7](/img/sprint1/0-diagrama-logico.png) 
+![Figura 8(/img/sprint1/0-diagrama-logico.png) 
+
+
+
