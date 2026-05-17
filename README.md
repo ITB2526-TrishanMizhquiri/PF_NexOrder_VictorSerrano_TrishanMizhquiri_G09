@@ -56,7 +56,7 @@ El sistema se despliega en **Amazon Web Services (AWS)** siguiendo las mejores p
           |  |  SUBNET PÚBLICA  |  |
           |  |  (10.0.1.0/24)   |  |
           |  |                  |  |
-          |  |   🖥️ EC2 (Web)   |  |  <--- Amazon Linux 2023
+          |  |    EC2 (Web)   |  |  <--- Amazon Linux 2023
           |  |   Apache + PHP   |  |       PHP 8.5, Fail2ban
           |  +--------+---------+  |
           |           |            |
@@ -66,7 +66,7 @@ El sistema se despliega en **Amazon Web Services (AWS)** siguiendo las mejores p
           |  |  SUBNET PRIVADA  |  |
           |  |  (10.0.2.0/24)   |  |
           |  |                  |  |
-          |  |   🛢️ RDS MySQL   |  |  <--- MySQL 8.0
+          |  |    RDS MySQL   |  |  <--- MySQL 8.0
           |  |   nexorder-db    |  |       Aislada, cifrada
           |  +------------------+  |
           +------------------------+
