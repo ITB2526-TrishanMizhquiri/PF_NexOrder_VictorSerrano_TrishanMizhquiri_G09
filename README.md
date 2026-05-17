@@ -1,11 +1,4 @@
 #  NexOrder: Sistema Digital para Restaurantes en AWS
-**Digitalización y Transformación Tecnológica para el Sector HORECA**
-
-[![AWS](https://img.shields.io/badge/Cloud-AWS-orange)](https://aws.amazon.com)
-[![PHP](https://img.shields.io/badge/PHP-8.5-blue)](https://www.php.net)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-lightgrey)](https://www.mysql.com)
-[![Apache](https://img.shields.io/badge/Apache-2.4-red)](https://httpd.apache.org)
-[![Security](https://img.shields.io/badge/Security-Hardened-green)]()
 
 > **Estado del Proyecto:**  Operativo en AWS (us-east-1)  
 > **Autores:** Victor Serrano & Trishan Mizhquiri | Grupo 09  
