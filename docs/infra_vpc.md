@@ -10,7 +10,7 @@
 
 ---
 
-## 📋 Índice
+##  Índice
 
 1. [Arquitectura de Red](#1-arquitectura-de-red)
 2. [TA01: VPC y Subredes](#2-ta01-vpc-y-subredes)
