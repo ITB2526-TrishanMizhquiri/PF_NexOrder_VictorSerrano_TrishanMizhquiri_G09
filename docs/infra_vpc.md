@@ -188,7 +188,7 @@ Se crean **dos tablas de enrutamiento independientes** para implementar una sepa
 Esta tabla **no contiene** ninguna ruta `0.0.0.0/0`, lo que garantiza que la base de datos nunca pueda ser alcanzada directamente desde Internet ni pueda iniciar conexiones salientes hacia él.
 
 ![Figura 10](/img/sprint1/10-rt-privada.png) 
-> 📸 **Figura 10 – Tabla de enrutamiento privada:** con asociación explícita a `Subnet-Privada-D` (CIDR `10.0.2.0/23`), sin ruta a Internet
+>  **Figura 10 – Tabla de enrutamiento privada:** con asociación explícita a `Subnet-Privada-D` (CIDR `10.0.2.0/23`), sin ruta a Internet
 ---
 
 ## 4. TA03: Instancias EC2 y RDS
@@ -259,7 +259,7 @@ ssh -i "NexOrder-SSH-Key.pem" ec2-user@44.207.176.14
 **Resultado esperado:** banner de bienvenida de Amazon Linux 2023 y prompt `[ec2-user@Web-NexOrder ~]$`.
 
 ![Figura 15](/img/sprint1/15-ssh-ec2user.png) 
-> 📸 **Figura 15 – Terminal SSH exitosa:** conexión como `ec2-user` a `44.207.176.14` con Amazon Linux 2023
+>  **Figura 15 – Terminal SSH exitosa:** conexión como `ec2-user` a `44.207.176.14` con Amazon Linux 2023
 
 ---
 
