@@ -1,4 +1,4 @@
-# 🍽️ NexOrder: Sistema Digital para Restaurantes en AWS
+#  NexOrder: Sistema Digital para Restaurantes en AWS
 **Digitalización y Transformación Tecnológica para el Sector HORECA**
 
 [![AWS](https://img.shields.io/badge/Cloud-AWS-orange)](https://aws.amazon.com)
@@ -7,43 +7,43 @@
 [![Apache](https://img.shields.io/badge/Apache-2.4-red)](https://httpd.apache.org)
 [![Security](https://img.shields.io/badge/Security-Hardened-green)]()
 
-> **Estado del Proyecto:** 🟢 Operativo en AWS (us-east-1)  
+> **Estado del Proyecto:**  Operativo en AWS (us-east-1)  
 > **Autores:** Victor Serrano & Trishan Mizhquiri | Grupo 09  
 > **Ciclo:** ASIX - Administración de Sistemas Informáticos en Red
 
 ---
 
-## 📖 Índice
-- [🎯 Sobre el Proyecto](#-sobre-el-proyecto)
-- [☁️ Arquitectura en la Nube](#️-arquitectura-en-la-nube)
-- [🚀 Sprint Timeline](#-sprint-timeline)
-- [📂 Estructura del Repositorio](#-estructura-del-repositorio)
-- [📘 Documentación Técnica](#-documentación-técnica)
-- [📚 Manual Técnico Completo](#-manual-técnico-completo)
-- [👥 Equipo](#-equipo)
-- [🏁 Conclusión](#-conclusión)
+##  Índice
+- [ Sobre el Proyecto](#-sobre-el-proyecto)
+- [ Arquitectura en la Nube](#️-arquitectura-en-la-nube)
+- [ Sprint Timeline](#-sprint-timeline)
+- [ Estructura del Repositorio](#-estructura-del-repositorio)
+- [ Documentación Técnica](#-documentación-técnica)
+- [ Manual Técnico Completo](#-manual-técnico-completo)
+- [ Equipo](#-equipo)
+- [ Conclusión](#-conclusión)
 
 ---
 
-## 🎯 Sobre el Proyecto
+##  Sobre el Proyecto
 
 **NexOrder** es una plataforma web completa diseñada para reemplazar los procesos manuales de toma de pedidos en restaurantes. Permite a los clientes consultar menús digitales y realizar pedidos, mientras que la cocina visualiza las comandas en un panel de control en tiempo real.
 
-### 💡 Beneficios Clave
+###  Beneficios Clave
 | Beneficio | Descripción |
 |:---|:---|
-| 📉 **Reducción de errores** | Eliminación de comandas perdidas o mal interpretadas. |
-| 📱 **Accesibilidad** | Interfaz responsive (Móvil, Tablet, Desktop). |
-| 📊 **Control en tiempo real** | Gestión dinámica de estados (Pendiente → Preparación → Listo). |
-| 🌿 **Sostenibilidad** | Drástica reducción del consumo de papel. |
+|  **Reducción de errores** | Eliminación de comandas perdidas o mal interpretadas. |
+|  **Accesibilidad** | Interfaz responsive (Móvil, Tablet, Desktop). |
+|  **Control en tiempo real** | Gestión dinámica de estados (Pendiente → Preparación → Listo). |
+|  **Sostenibilidad** | Drástica reducción del consumo de papel. |
 
 ---
 
-## ☁️ Arquitectura en la Nube
+##  Arquitectura en la Nube
 
 El sistema se despliega en **Amazon Web Services (AWS)** siguiendo las mejores prácticas de seguridad y escalabilidad.
 
-### 🏗️ Diagrama de Infraestructura
+### Diagrama de Infraestructura
 ```text
                   INTERNET
                       |
@@ -72,7 +72,7 @@ El sistema se despliega en **Amazon Web Services (AWS)** siguiendo las mejores p
           +------------------------+
 ```
 
-### 🛠️ Stack Tecnológico
+###  Stack Tecnológico
 - **Infraestructura:** AWS VPC, EC2 (t3.micro), RDS (db.t3.micro), S3 (Backups).
 - **Sistema Operativo:** Amazon Linux 2023 (Hardened).
 - **Backend:** PHP 8.5 con Apache 2.4.
@@ -81,39 +81,39 @@ El sistema se despliega en **Amazon Web Services (AWS)** siguiendo las mejores p
 
 ---
 
-## 🚀 Sprint Timeline
+##  Sprint Timeline
 
 El desarrollo se ha organizado en Sprints ágiles semanales:
 
-### 📅 Sprint 1: Infraestructura Base (13-19 Abril)
-✅ Creación de VPC, Subredes (Pública/Privada) y Route Tables.  
-✅ Despliegue de EC2 y RDS MySQL.  
-✅ Configuración de Security Groups (Mínimo privilegio).  
-✅ Hardening inicial del SO y SSH.  
-🔗 *Ver documentación: [Infraestructura VPC](docs/infra_vpc.md)*
+###  Sprint 1: Infraestructura Base (13-19 Abril)
+ Creación de VPC, Subredes (Pública/Privada) y Route Tables.  
+ Despliegue de EC2 y RDS MySQL.  
+ Configuración de Security Groups (Mínimo privilegio).  
+ Hardening inicial del SO y SSH.  
+ *Ver documentación: [Infraestructura VPC](docs/infra_vpc.md)*
 
-### 📅 Sprint 2: Servicios Web y Seguridad (20-26 Abril)
-✅ Instalación de Stack LAMP (Apache + PHP).  
-✅ Implementación de SSL/TLS y redirección HTTPS.  
-✅ Configuración de Fail2ban (Protección fuerza bruta).  
-✅ Hardening de MySQL (Usuario app con permisos limitados).  
-🔗 *Ver documentación: [Servicios Web](docs/infra_webserver.md)*
+###  Sprint 2: Servicios Web y Seguridad (20-26 Abril)
+ Instalación de Stack LAMP (Apache + PHP).  
+ Implementación de SSL/TLS y redirección HTTPS.  
+ Configuración de Fail2ban (Protección fuerza bruta).  
+ Hardening de MySQL (Usuario app con permisos limitados).  
+ *Ver documentación: [Servicios Web](docs/infra_webserver.md)*
 
-### 📅 Sprint 3: Monitorización y Resiliencia (27 Abril - 03 Mayo)
-✅ Automatización de Backups (Scripts Bash + Cron).  
-✅ Configuración de CloudWatch (Alarmas CPU, Dashboard EBS).  
-✅ Pruebas de Restauración (RTO: 24 min 01s).  
-✅ Auditoría externa con Nmap.  
-🔗 *Ver documentación: [Monitorización](docs/infra_monitoring.md)*
+###  Sprint 3: Monitorización y Resiliencia (27 Abril - 03 Mayo)
+ Automatización de Backups (Scripts Bash + Cron).  
+ Configuración de CloudWatch (Alarmas CPU, Dashboard EBS).  
+ Pruebas de Restauración (RTO: 24 min 01s).  
+ Auditoría externa con Nmap.  
+*Ver documentación: [Monitorización](docs/infra_monitoring.md)*
 
-### 📅 Sprint 4: Cierre y Auditoría Final (04-12 Mayo)
-🔄 Migración a certificados SSL reales (Let's Encrypt).  
-🔄 Replicación de backups a S3.  
-🔄 Auditoría final de Compliance y entrega del proyecto.
+###  Sprint 4: Cierre y Auditoría Final (04-12 Mayo)
+ Migración a certificados SSL reales (Let's Encrypt).  
+ Replicación de backups a S3.  
+ Auditoría final de Compliance y entrega del proyecto.
 
 ---
 
-## 📂 Estructura del Repositorio
+##  Estructura del Repositorio
 
 ```bash
 .
@@ -136,16 +136,16 @@ El desarrollo se ha organizado en Sprints ágiles semanales:
 
 ---
 
-## 📘 Documentación Técnica
+##  Documentación Técnica
 
 Acceso directo a la documentación detallada por fases:
 
 | Fase | Documento | Enlace |
 |:---|:---|:---|
-| 📦 **Infraestructura** | Configuración de Red, VPC y EC2 | [`docs/infra_vpc.md`](docs/infra_vpc.md) |
-| 🌐 **Web Server** | Apache, SSL/TLS y Hardening | [`docs/infra_webserver.md`](docs/infra_webserver.md) |
-| ☁️ **Monitorización** | Backups, CloudWatch y Despliegue | [`docs/infra_monitoring.md`](docs/infra_monitoring.md) |
-| 👤 **Manual Cliente** | Guía de uso para usuarios finales | [`docs/docs_client.md`](docs/docs_client.md) |
+|  **Infraestructura** | Configuración de Red, VPC y EC2 | [`docs/infra_vpc.md`](docs/infra_vpc.md) |
+|  **Web Server** | Apache, SSL/TLS y Hardening | [`docs/infra_webserver.md`](docs/infra_webserver.md) |
+|  **Monitorización** | Backups, CloudWatch y Despliegue | [`docs/infra_monitoring.md`](docs/infra_monitoring.md) |
+|  **Manual Cliente** | Guía de uso para usuarios finales | [`docs/docs_client.md`](docs/docs_client.md) |
 
 ---
 
@@ -189,15 +189,15 @@ El manual técnico completo incluye:
 - Esquema de base de datos completo (nexorder_schema.sql)
 - Procedimientos de emergencia y troubleshooting
 
-### 🔗 Acceso al Manual
+###  Acceso al Manual
 
-📄 **Documento completo:** [`docs/docs_tecnic.md`](docs/docs_tecnic.md)
+ **Documento completo:** [`docs/docs_tecnic.md`](docs/docs_tecnic.md)
 
-> ℹ️ **Nota:** El manual técnico está diseñado como referencia completa para administradores de sistemas, desarrolladores y auditores. Incluye diagramas de arquitectura, comandos exactos, justificaciones técnicas y evidencias de implementación.
+> Nota: El manual técnico está diseñado como referencia completa para administradores de sistemas, desarrolladores y auditores. Incluye diagramas de arquitectura, comandos exactos, justificaciones técnicas y evidencias de implementación.
 
 ---
 
-## 👥 Equipo
+##  Equipo
 
 | Miembro | Rol Principal | GitHub / Contacto |
 |:---|:---|:---|
@@ -206,7 +206,7 @@ El manual técnico completo incluye:
 
 ---
 
-## 🏁 Conclusión
+## Conclusión
 
 Este proyecto demuestra la evolución de procesos manuales a una solución cloud escalable, resiliente y segura. NexOrder integra competencias clave en administración de sistemas, desarrollo web y seguridad, cumpliendo con los estándares profesionales del sector.
 
