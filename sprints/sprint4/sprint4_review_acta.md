@@ -1,6 +1,3 @@
-## 📄 `docs/actas/sprint4_planning.md`
-
-```markdown
 # Acta Sprint Planning - Sprint 4
 **Proyecto:** NexOrder Infrastructure  
 **Semana:** S4  
