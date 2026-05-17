@@ -28,7 +28,7 @@ NexOrder es una plataforma de gestión de pedidos diseñada para restaurantes y 
 │         USUARIOS FINALES         │
 │   (Navegador · Móvil · Tablet)   │
 └─────────┬───────────────────────┘
-          │ 🔐 HTTPS (cifrado)
+          │ HTTPS (cifrado)
           ▼
 ┌─────────────────────────────────┐
 │      SERVIDOR WEB (PÚBLICO)      │
@@ -36,7 +36,7 @@ NexOrder es una plataforma de gestión de pedidos diseñada para restaurantes y 
 │  • Certificado SSL/TLS activo    │
 │  • Protección contra ataques     │
 └─────────┬───────────────────────┘
-          │ 🔐 Conexión interna segura
+          │  Conexión interna segura
           ▼
 ┌─────────────────────────────────┐
 │    BASE DE DATOS (PRIVADA)       │
