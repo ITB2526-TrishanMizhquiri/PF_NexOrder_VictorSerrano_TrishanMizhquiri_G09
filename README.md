@@ -149,11 +149,11 @@ Acceso directo a la documentación detallada por fases:
 
 ---
 
-## 📚 Manual Técnico Completo
+##  Manual Técnico Completo
 
 Documentación técnica unificada que consolida toda la arquitectura, configuración y procedimientos operativos del proyecto NexOrder.
 
-### 📖 Contenido del Manual Técnico
+###  Contenido del Manual Técnico
 
 El manual técnico completo incluye:
 
