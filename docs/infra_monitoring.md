@@ -6,7 +6,11 @@
 
 **Fecha:** 27 de abril 2026 – 3 de mayo 2026
 
-**Módulos:** M0374 (Automatización) · M0377 (Backups) · M0378 (Auditoría) · C037 (Seguridad)
+**Módulos:** M036
+4 (Automatización) · M036
+7 (Backups) · M036
+8 (Auditoría) · C036
+ (Seguridad)
 
 ---
 
@@ -50,7 +54,7 @@
 El Sprint 3 añade la **capa de operaciones** sobre la infraestructura y servicios de los sprints anteriores. Se implementan cinco pilares de resiliencia que garantizan la continuidad del negocio:
 
 ![Arquitectura de Monitorización y Resiliencia](/img/sprint3/0-arquitectura.png)
-> 📸 **Figura 0 – Arquitectura de operaciones:** diagrama conceptual de los flujos de monitorización y resiliencia (ver sección [Leyenda de Imágenes](#10-leyenda-de-imágenes))
+> 📸 **Figura 0 – Arquitectura de operaciones:** diagrama conceptual de los flujos de monitorización y resiliencia
 
 ---
 
@@ -137,13 +141,13 @@ tail -5 /var/log/nexorder_backup.log
 **Resultado en `/backups/`:**
 ```
 total 4.0K
--rw-r--r--. 1 ec2-user ec2-user 2.4K May 10 14:47 nexorder_db_20260510_144738.sql.gz
+-rw-r--r--. 1 ec2-user ec2-user 2.4K May 10 14:47 nexorder_db_20260510_144737.sql.gz
 ```
 
 **Resultado en el log:**
 ```
-[2026-05-10 14:47:38] [ÉXITO] Backup creado: nexorder_db_20260510_144738.sql.gz (4.0K)
-[2026-05-10 14:47:38] [INFO] Limpieza de backups antiguos completada.
+[2026-05-10 14:47:37] [ÉXITO] Backup creado: nexorder_db_20260510_144737.sql.gz (4.0K)
+[2026-05-10 14:47:37] [INFO] Limpieza de backups antiguos completada.
 ```
 
 Las advertencias de `mysqldump` sobre GTIDs son normales en RDS gestionado y no afectan a la integridad del backup.
@@ -170,7 +174,7 @@ sudo chown ec2-user:ec2-user /var/log/nexorder_backup.log
 sudo chmod 664 /var/log/nexorder_backup.log
 ```
 
-![Verificación y ajuste de permisos del log](/img/sprint3/05-cron-log-permissions.png)
+![Verificación y ajuste de permisos del log](/img/sprint3/5-cron-log-permissions.png)
 > 📸 **Figura 5** – `ls -l` mostrando el log antes (`-rw-------`) y después (`-rw-rw-r--`) del ajuste de permisos con `chmod 664`
 
 ---
@@ -182,7 +186,12 @@ Amazon Linux 2023 no incluye `crond` por defecto; se instala el paquete `cronie`
 ```bash
 # Instalar el demonio cron
 sudo dnf install cronie -y
+```
 
+![Instalación de cronie](/img/sprint3/6-cronie-install.png)
+> 📸 **Figura 6** – `sudo dnf install cronie -y` instalando `cronie 1.5.7` y `cronie-anacron 1.5.7`
+
+```bash 
 # Habilitar para arranque automático e iniciar inmediatamente
 sudo systemctl enable crond
 sudo systemctl start crond
@@ -193,10 +202,8 @@ sudo systemctl status crond
 
 **Versiones instaladas:** `cronie 1.5.7-1.amzn2023.0.2` y `cronie-anacron 1.5.7-1.amzn2023.0.2`
 
-![Instalación de cronie](/img/sprint3/06-cronie-install.png)
-> 📸 **Figura 6** – `sudo dnf install cronie -y` instalando `cronie 1.5.7` y `cronie-anacron 1.5.7`
 
-![Estado del servicio crond](/img/sprint3/07-crond-status.png)
+![Estado del servicio crond](/img/sprint3/7-crond-status.png)
 > 📸 **Figura 7** – `systemctl status crond` mostrando `active (running)` con PID 2562, con mensajes de inicio `CRON STARTUP (1.5.7)` e `inotify support`
 
 ---
@@ -236,10 +243,11 @@ Línea añadida al final del archivo:
 | `>> log` | Append al log | Acumula historial sin sobreescribir registros anteriores |
 | `2>&1` | Redirigir stderr a stdout | Captura tanto salida normal como errores en el mismo log |
 
-![Crontab con tarea instalada](/img/sprint3/08-crontab-edit.png)
+![Crontab con tarea instalada](/img/sprint3/8-crontab-edit-1.png)
+![Crontab con tarea instalada](/img/sprint3/8-crontab-edit-2.png)
 > 📸 **Figura 8** – Editor crontab con el mensaje `installing new crontab` y la línea `0 3 * * *` añadida
 
-![Crontab modo prueba cada minuto](/img/sprint3/09-crontab-test-mode.png)
+![Crontab modo prueba cada minuto](/img/sprint3/9-crontab-test-mode.png)
 > 📸 **Figura 9** – Editor crontab mostrando la versión de prueba `* * * * *` (cada minuto) junto a la definitiva `0 3 * * *`
 
 ---
@@ -311,7 +319,8 @@ El `postrotate` es crítico: sin él, Apache seguiría escribiendo en el archivo
 ![Apertura de /etc/logrotate.d/httpd](/img/sprint3/12-logrotate-httpd-open.png)
 > 📸 **Figura 12** – Terminal con `sudo nano /etc/logrotate.d/httpd` abriendo el archivo de configuración
 
-![Contenido logrotate httpd en nano](/img/sprint3/13-logrotate-httpd-content.png)
+![Contenido logrotate httpd en nano](/img/sprint3/13-logrotate-httpd-content-1.png)
+![Contenido logrotate httpd en nano](/img/sprint3/13-logrotate-httpd-content-2.png)
 > 📸 **Figura 13** – Editor nano con el bloque completo de logrotate para `/var/log/httpd/*log` incluyendo `postrotate` con `systemctl reload`
 
 ![Validación logrotate httpd en modo debug](/img/sprint3/14-logrotate-httpd-debug.png)
@@ -343,7 +352,8 @@ Contenido:
 ![Apertura de /etc/logrotate.d/mysql](/img/sprint3/15-logrotate-mysql-open.png)
 > 📸 **Figura 15** – Terminal con `sudo nano /etc/logrotate.d/mysql` abriendo el archivo
 
-![Contenido logrotate mysql y validación debug](/img/sprint3/16-logrotate-mysql-content.png)
+![Contenido logrotate mysql y validación debug](/img/sprint3/16-logrotate-mysql-content-1.png)
+![Contenido logrotate mysql y validación debug](/img/sprint3/16-logrotate-mysql-content-2.png)
 > 📸 **Figura 16** – Editor nano con `/etc/logrotate.d/mysql` mostrando `copytruncate` y el bloque completo + salida de `logrotate -d` en modo debug
 
 ---
@@ -547,14 +557,11 @@ curl -k https://localhost/version2.html
 ![Archivo version2.html en staging](/img/sprint3/35-staging-version2-html.png)
 > 📸 **Figura 35** – Editor nano con el contenido de `version2.html` (HTML de prueba con título `NexOrder v2.0` y mensaje de despliegue exitoso)
 
-![Script deploy completo con sudo rsync](/img/sprint3/36-deploy-script-full.png)
-> 📸 **Figura 36** – Editor nano con la segunda parte del script `deploy_nexorder.sh` mostrando el bloque `sudo rsync -avz --delete` y el bloque `if [ $? -eq 0 ]` completo
+![Verificación post-despliegue y log](/img/sprint3/36-deploy-verification-log.png)
+> 📸 **Figura 36** – `ls -l /var/www/html/version2.html` confirmando el archivo en producción (229 bytes, May 10 16:13) + `tail -10 /var/log/deploy_nexorder.log` con las 6 líneas de auditoría del despliegue exitoso
 
-![Verificación post-despliegue y log](/img/sprint3/37-deploy-verification-log.png)
-> 📸 **Figura 37** – `ls -l /var/www/html/version2.html` confirmando el archivo en producción (229 bytes, May 10 16:13) + `tail -10 /var/log/deploy_nexorder.log` con las 6 líneas de auditoría del despliegue exitoso
-
-![curl HTTP y HTTPS sobre version2.html](/img/sprint3/38-deploy-curl-test.png)
-> 📸 **Figura 38** – `curl -I http://localhost/version2.html` devolviendo `301 Moved Permanently` + `curl -k https://localhost/version2.html` devolviendo el HTML completo de `NexOrder v2.0`
+![curl HTTP y HTTPS sobre version2.html](/img/sprint3/37-deploy-curl-test.png)
+> 📸 **Figura 37** – `curl -I http://localhost/version2.html` devolviendo `301 Moved Permanently` + `curl -k https://localhost/version2.html` devolviendo el HTML completo de `NexOrder v2.0`
 
 ---
 
@@ -740,14 +747,15 @@ nmap -p 1-1000 -T4 -A -V 44.207.176.14
 - **Conexión estable**: baja latencia entre la máquina Kali y el servidor AWS confirma conectividad correcta.
 - **Ningún servicio innecesario expuesto**: no hay APIs internas, paneles de administración ni servicios de datos accesibles públicamente.
 
-![Escaneo nmap desde Kali Linux](/img/sprint3/46-nmap-scan-result.png)
+![Escaneo nmap desde Kali Linux](/img/sprint3/45-nmap-scan-result.png)
 > 📸 **Figura 46** – Terminal Kali Linux (`kali@VictorS`) ejecutando `nmap -p 1-1000 -T4 -A -V 44.207.176.14` con la salida completa del escaneo mostrando el progreso de NSE scripts y el resultado final
 
 ---
 
 ## 9. Justificación de Criterios
 
-### 9.1 M0374 – Administración Remota y Automatización
+### 9.1 M036
+4 – Administración Remota y Automatización
 
 | Evidencia | Tarea | Estado |
 |-----------|-------|--------|
@@ -756,7 +764,8 @@ nmap -p 1-1000 -T4 -A -V 44.207.176.14
 | Script Bash `deploy_nexorder.sh` con `rsync`, doble validación y `systemctl reload` | T17 | ✅ |
 | Gestión de servicios con `systemctl` (crond, httpd) | T14, T17 | ✅ |
 
-### 9.2 M0377 – Backups Lógicos y Rotación
+### 9.2 M036
+7 – Backups Lógicos y Rotación
 
 | Evidencia | Tarea | Estado |
 |-----------|-------|--------|
@@ -765,7 +774,8 @@ nmap -p 1-1000 -T4 -A -V 44.207.176.14
 | Rotación de logs Apache: `daily`, `rotate 7`, `compress`, `postrotate reload` | T15 | ✅ |
 | Rotación de logs MySQL: `daily`, `rotate 7`, `compress`, `copytruncate` | T15 | ✅ |
 
-### 9.3 M0378 – Auditoría y Recuperación
+### 9.3 M036
+8 – Auditoría y Recuperación
 
 | Evidencia | Tarea | Estado |
 |-----------|-------|--------|
@@ -774,7 +784,8 @@ nmap -p 1-1000 -T4 -A -V 44.207.176.14
 | RTO real calculado y documentado: **24 min 01s** | T18 | ✅ |
 | Informe `restore_test.md` con tiempos, pasos y resultado | T18 | ✅ |
 
-### 9.4 C037 – Seguridad y Resiliencia
+### 9.4 C036
+ – Seguridad y Resiliencia
 
 | Evidencia | Tarea | Mecanismo |
 |-----------|-------|-----------|
