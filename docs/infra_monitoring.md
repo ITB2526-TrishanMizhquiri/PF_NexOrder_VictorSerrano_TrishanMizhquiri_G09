@@ -54,7 +54,7 @@
 El Sprint 3 añade la **capa de operaciones** sobre la infraestructura y servicios de los sprints anteriores. Se implementan cinco pilares de resiliencia que garantizan la continuidad del negocio:
 
 ![Arquitectura de Monitorización y Resiliencia](/img/sprint3/0-arquitectura.png)
-> 📸 **Figura 0 – Arquitectura de operaciones:** diagrama conceptual de los flujos de monitorización y resiliencia
+> **Figura 0 – Arquitectura de operaciones:** diagrama conceptual de los flujos de monitorización y resiliencia
 
 ---
 
@@ -89,7 +89,7 @@ chmod 600 /var/log/nexorder_backup.log
 | `nexorder_backup.log` | `600` | El log incluye mensajes con nombres de BD; solo el propietario debe leerlo |
 
 ![Preparación permisos backup](/img/sprint3/1-backup-env-setup.png)
-> 📸 **Figura 1** – Terminal ejecutando los cinco comandos de preparación: `mkdir /backups`, `touch nexorder_backup.log`, `chown ec2-user`, `chmod 700` y `chmod 600`
+> **Figura 1** – Terminal ejecutando los cinco comandos de preparación: `mkdir /backups`, `touch nexorder_backup.log`, `chown ec2-user`, `chmod 700` y `chmod 600`
 
 ---
 
@@ -118,10 +118,10 @@ sudo chmod +x /usr/local/bin/backup_nexorder.sh
 - **Timestamps en log**: cada línea incluye fecha y hora exactas, creando una traza de auditoría completa.
 
 ![Script backup_nexorder.sh en nano](/img/sprint3/2-backup-script-nano.png)
-> 📸 **Figura 2** – Editor nano con el contenido completo de `backup_nexorder.sh` mostrando configuración, pipeline `mysqldump | gzip` y bloque `if [ $? -eq 0 ]`
+> **Figura 2** – Editor nano con el contenido completo de `backup_nexorder.sh` mostrando configuración, pipeline `mysqldump | gzip` y bloque `if [ $? -eq 0 ]`
 
 ![chmod +x del script](/img/sprint3/3-backup-chmod.png)
-> 📸 **Figura 3** – `sudo nano /usr/local/bin/backup_nexorder.sh` y `sudo chmod +x` del script
+> **Figura 3** – `sudo nano /usr/local/bin/backup_nexorder.sh` y `sudo chmod +x` del script
 
 ---
 
@@ -153,7 +153,7 @@ total 4.0K
 Las advertencias de `mysqldump` sobre GTIDs son normales en RDS gestionado y no afectan a la integridad del backup.
 
 ![Prueba manual del backup](/img/sprint3/4-backup-manual-test.png)
-> 📸 **Figura 4** – `ls -lh /backups/` mostrando el `.sql.gz` generado + `tail -5 nexorder_backup.log` con entradas `[ÉXITO]` y `[INFO] Limpieza`
+> **Figura 4** – `ls -lh /backups/` mostrando el `.sql.gz` generado + `tail -5 nexorder_backup.log` con entradas `[ÉXITO]` y `[INFO] Limpieza`
 
 ---
 
@@ -175,7 +175,7 @@ sudo chmod 664 /var/log/nexorder_backup.log
 ```
 
 ![Verificación y ajuste de permisos del log](/img/sprint3/5-cron-log-permissions.png)
-> 📸 **Figura 5** – `ls -l` mostrando el log antes (`-rw-------`) y después (`-rw-rw-r--`) del ajuste de permisos con `chmod 664`
+> **Figura 5** – `ls -l` mostrando el log antes (`-rw-------`) y después (`-rw-rw-r--`) del ajuste de permisos con `chmod 664`
 
 ---
 
@@ -189,7 +189,7 @@ sudo dnf install cronie -y
 ```
 
 ![Instalación de cronie](/img/sprint3/6-cronie-install.png)
-> 📸 **Figura 6** – `sudo dnf install cronie -y` instalando `cronie 1.5.7` y `cronie-anacron 1.5.7`
+> **Figura 6** – `sudo dnf install cronie -y` instalando `cronie 1.5.7` y `cronie-anacron 1.5.7`
 
 ```bash 
 # Habilitar para arranque automático e iniciar inmediatamente
@@ -204,7 +204,7 @@ sudo systemctl status crond
 
 
 ![Estado del servicio crond](/img/sprint3/7-crond-status.png)
-> 📸 **Figura 7** – `systemctl status crond` mostrando `active (running)` con PID 2562, con mensajes de inicio `CRON STARTUP (1.5.7)` e `inotify support`
+> **Figura 7** – `systemctl status crond` mostrando `active (running)` con PID 2562, con mensajes de inicio `CRON STARTUP (1.5.7)` e `inotify support`
 
 ---
 
@@ -245,10 +245,10 @@ Línea añadida al final del archivo:
 
 ![Crontab con tarea instalada](/img/sprint3/8-crontab-edit-1.png)
 ![Crontab con tarea instalada](/img/sprint3/8-crontab-edit-2.png)
-> 📸 **Figura 8** – Editor crontab con el mensaje `installing new crontab` y la línea `0 3 * * *` añadida
+> **Figura 8** – Editor crontab con el mensaje `installing new crontab` y la línea `0 3 * * *` añadida
 
 ![Crontab modo prueba cada minuto](/img/sprint3/9-crontab-test-mode.png)
-> 📸 **Figura 9** – Editor crontab mostrando la versión de prueba `* * * * *` (cada minuto) junto a la definitiva `0 3 * * *`
+> **Figura 9** – Editor crontab mostrando la versión de prueba `* * * * *` (cada minuto) junto a la definitiva `0 3 * * *`
 
 ---
 
@@ -267,10 +267,10 @@ crontab -l
 Para validar sin esperar a las 03:00 AM, se ejecutó temporalmente con `* * * * *` (cada minuto), generando múltiples backups que confirman el funcionamiento correcto.
 
 ![crontab -l con tarea verificada](/img/sprint3/10-crontab-verify.png)
-> 📸 **Figura 10** – `crontab -l` mostrando `0 3 * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1`
+> **Figura 10** – `crontab -l` mostrando `0 3 * * * /usr/local/bin/backup_nexorder.sh >> /var/log/nexorder_backup.log 2>&1`
 
 ![Listado de backups generados por cron](/img/sprint3/11-backups-listing.png)
-> 📸 **Figura 11** – `ls -lh /backups/` con 6 archivos `.sql.gz` timestamped generados durante la prueba con `* * * * *`
+> **Figura 11** – `ls -lh /backups/` con 6 archivos `.sql.gz` timestamped generados durante la prueba con `* * * * *`
 
 ---
 
@@ -317,14 +317,14 @@ Contenido aplicado:
 El `postrotate` es crítico: sin él, Apache seguiría escribiendo en el archivo antiguo (ya renombrado por logrotate) porque mantiene el descriptor de fichero abierto.
 
 ![Apertura de /etc/logrotate.d/httpd](/img/sprint3/12-logrotate-httpd-open.png)
-> 📸 **Figura 12** – Terminal con `sudo nano /etc/logrotate.d/httpd` abriendo el archivo de configuración
+> **Figura 12** – Terminal con `sudo nano /etc/logrotate.d/httpd` abriendo el archivo de configuración
 
 ![Contenido logrotate httpd en nano](/img/sprint3/13-logrotate-httpd-content-1.png)
 ![Contenido logrotate httpd en nano](/img/sprint3/13-logrotate-httpd-content-2.png)
-> 📸 **Figura 13** – Editor nano con el bloque completo de logrotate para `/var/log/httpd/*log` incluyendo `postrotate` con `systemctl reload`
+> **Figura 13** – Editor nano con el bloque completo de logrotate para `/var/log/httpd/*log` incluyendo `postrotate` con `systemctl reload`
 
 ![Validación logrotate httpd en modo debug](/img/sprint3/14-logrotate-httpd-debug.png)
-> 📸 **Figura 14** – Salida de `sudo logrotate -d /etc/logrotate.d/httpd` mostrando `rotating log /var/log/httpd/access_log after 1 days (7 rotations)` sin errores
+> **Figura 14** – Salida de `sudo logrotate -d /etc/logrotate.d/httpd` mostrando `rotating log /var/log/httpd/access_log after 1 days (7 rotations)` sin errores
 
 ---
 
@@ -350,11 +350,11 @@ Contenido:
 **¿Por qué `copytruncate` en lugar de `postrotate`?** MySQL mantiene el archivo de log abierto con un descriptor bloqueado. Con `copytruncate`, logrotate primero copia el contenido al archivo rotado y luego trunca el original a 0 bytes, sin necesidad de enviar señales al proceso MySQL (que en RDS no es accesible directamente).
 
 ![Apertura de /etc/logrotate.d/mysql](/img/sprint3/15-logrotate-mysql-open.png)
-> 📸 **Figura 15** – Terminal con `sudo nano /etc/logrotate.d/mysql` abriendo el archivo
+> **Figura 15** – Terminal con `sudo nano /etc/logrotate.d/mysql` abriendo el archivo
 
 ![Contenido logrotate mysql y validación debug](/img/sprint3/16-logrotate-mysql-content-1.png)
 ![Contenido logrotate mysql y validación debug](/img/sprint3/16-logrotate-mysql-content-2.png)
-> 📸 **Figura 16** – Editor nano con `/etc/logrotate.d/mysql` mostrando `copytruncate` y el bloque completo + salida de `logrotate -d` en modo debug
+> **Figura 16** – Editor nano con `/etc/logrotate.d/mysql` mostrando `copytruncate` y el bloque completo + salida de `logrotate -d` en modo debug
 
 ---
 
@@ -367,10 +367,10 @@ CloudWatch transforma la monitorización de reactiva (revisar el servidor cuando
 Se accede a la consola AWS → búsqueda del servicio → CloudWatch. La página de Overview muestra el estado inicial sin alarmas ni paneles configurados.
 
 ![Búsqueda de CloudWatch en consola AWS](/img/sprint3/17-cloudwatch-search.png)
-> 📸 **Figura 17** – Navegador con la consola AWS y búsqueda de "CloudWatch", mostrando el resultado `CloudWatch - Monitorice recursos y aplicaciones`
+> **Figura 17** – Navegador con la consola AWS y búsqueda de "CloudWatch", mostrando el resultado `CloudWatch - Monitorice recursos y aplicaciones`
 
 ![Overview de CloudWatch](/img/sprint3/18-cloudwatch-overview.png)
-> 📸 **Figura 18** – Página de Overview de CloudWatch con el asistente de configuración inicial y las 4 opciones principales (Crear alarmas, Panel, Registros, Eventos)
+> **Figura 18** – Página de Overview de CloudWatch con el asistente de configuración inicial y las 4 opciones principales (Crear alarmas, Panel, Registros, Eventos)
 
 ---
 
@@ -395,10 +395,10 @@ Parámetros de la alarma:
 **Lógica de activación:** si el valor medio de `CPUUtilization` supera el 80% durante un período de 1 minuto, la alarma pasa de `OK` a `En Alarma`, disparando inmediatamente la acción SNS configurada.
 
 ![Selector de métricas con CPUUtilization](/img/sprint3/19-cloudwatch-metric-select.png)
-> 📸 **Figura 19** – Selector de métricas CloudWatch con `CPUUtilization` de `09NexOrder-EC2-WEB-09` seleccionado (checkbox marcado) y gráfico de línea visible
+> **Figura 19** – Selector de métricas CloudWatch con `CPUUtilization` de `09NexOrder-EC2-WEB-09` seleccionado (checkbox marcado) y gráfico de línea visible
 
 ![Configuración de condiciones de la alarma](/img/sprint3/20-cloudwatch-alarm-conditions.png)
-> 📸 **Figura 20** – Formulario de condiciones: umbral Estático `> 80`, período 1 minuto, instancia `09NexOrder-EC2-WEB-09`, gráfico con la línea roja en 80%
+> **Figura 20** – Formulario de condiciones: umbral Estático `> 80`, período 1 minuto, instancia `09NexOrder-EC2-WEB-09`, gráfico con la línea roja en 80%
 
 ---
 
@@ -417,19 +417,19 @@ Amazon SNS requiere confirmación de la suscripción por email como medida de se
 **Descripción:** `Aviso cuando la CPU supera el 80%`
 
 ![Configurar las acciones SNS](/img/sprint3/21-cloudwatch-sns-action.png)
-> 📸 **Figura 21** – Formulario "Configurar las acciones" con `En modo alarma` seleccionado, tema SNS `Default_CloudWatch_Alarms_Topic` y email `victor.serrano.7e8@itb.cat`
+> **Figura 21** – Formulario "Configurar las acciones" con `En modo alarma` seleccionado, tema SNS `Default_CloudWatch_Alarms_Topic` y email `victor.serrano.7e8@itb.cat`
 
 ![Confirmación de suscripción SNS](/img/sprint3/22-sns-subscription-confirmed.png)
-> 📸 **Figura 22** – Página AWS SNS con `¡Suscripción confirmada!` y el ARN completo de la suscripción
+> **Figura 22** – Página AWS SNS con `¡Suscripción confirmada!` y el ARN completo de la suscripción
 
 ![Detalles de la alarma - nombre y descripción](/img/sprint3/23-cloudwatch-alarm-details.png)
-> 📸 **Figura 23** – Formulario "Agregar detalles de alarma" con nombre `Alarma_CPU_NexOrder_Serrano` y descripción `Aviso cuando la CPU supera el 80%`
+> **Figura 23** – Formulario "Agregar detalles de alarma" con nombre `Alarma_CPU_NexOrder_Serrano` y descripción `Aviso cuando la CPU supera el 80%`
 
 ![Vista previa completa de la alarma](/img/sprint3/24-cloudwatch-alarm-preview.png)
-> 📸 **Figura 24** – Página "Ver la vista previa y crear" con los 3 pasos resumidos: métrica CPU, acción SNS y nombre de la alarma antes de confirmar la creación
+> **Figura 24** – Página "Ver la vista previa y crear" con los 3 pasos resumidos: métrica CPU, acción SNS y nombre de la alarma antes de confirmar la creación
 
 ![Alarma creada correctamente](/img/sprint3/25-cloudwatch-alarm-created.png)
-> 📸 **Figura 25** – Banner verde `Se ha creado correctamente la alarma Alarma_CPU_NexOrder_Serrano` en el listado de alarmas con estado `Datos insuficientes`
+> **Figura 25** – Banner verde `Se ha creado correctamente la alarma Alarma_CPU_NexOrder_Serrano` en el listado de alarmas con estado `Datos insuficientes`
 
 ---
 
@@ -450,25 +450,25 @@ Nombre del dashboard: Dashboard_NexOrder_Serrano
 **¿Por qué monitorizar EBS?** Un disco saturado en lecturas o escrituras puede causar degradación de rendimiento en Apache y MySQL. Detectar esta saturación permite actuar antes de que los tiempos de respuesta se disparen.
 
 ![Diálogo de creación del panel](/img/sprint3/26-dashboard-create.png)
-> 📸 **Figura 26** – Diálogo modal "Crear un nuevo panel" con nombre `Dashboard_NexOrder_Serrano` y botón `Crear un panel`
+> **Figura 26** – Diálogo modal "Crear un nuevo panel" con nombre `Dashboard_NexOrder_Serrano` y botón `Crear un panel`
 
 ![Dashboard final con los tres widgets](/img/sprint3/27-dashboard-final.png)
-> 📸 **Figura 27** – Panel final `Dashboard_NexOrder_Serrano` con widget de línea `CPUUtilization` y widgets de número `VolumeReadBytes` (0 B) y `VolumeWriteBytes` (694 kB)
+> **Figura 27** – Panel final `Dashboard_NexOrder_Serrano` con widget de línea `CPUUtilization` y widgets de número `VolumeReadBytes` (0 B) y `VolumeWriteBytes` (694 kB)
 
 ![Selector de tipo de widget](/img/sprint3/28-widget-type-selector.png)
-> 📸 **Figura 28** – Selector de tipo de widget con `Línea` seleccionado; opciones visibles: Tabla, Número, Medidor, Área apilada, Barra, Gráfico circular, Explorador
+> **Figura 28** – Selector de tipo de widget con `Línea` seleccionado; opciones visibles: Tabla, Número, Medidor, Área apilada, Barra, Gráfico circular, Explorador
 
 ![Widget CPU tipo Número](/img/sprint3/29-widget-cpu-number.png)
-> 📸 **Figura 29** – Selector de métricas con `CPUUtilization` de `NexOrder-EC2-Web` marcado; tipo de widget cambiado a `Número`
+> **Figura 29** – Selector de métricas con `CPUUtilization` de `NexOrder-EC2-Web` marcado; tipo de widget cambiado a `Número`
 
 ![Gráfico de métricas con CPUUtilization](/img/sprint3/30-widget-cpu-line-graph.png)
-> 📸 **Figura 30** – Pantalla "Añadir gráfico de métrica" con `CPUUtilization` seleccionado y lista completa de métricas EC2 disponibles
+> **Figura 30** – Pantalla "Añadir gráfico de métrica" con `CPUUtilization` seleccionado y lista completa de métricas EC2 disponibles
 
 ![Selector de namespace EBS](/img/sprint3/31-ebs-namespace-selector.png)
-> 📸 **Figura 31** – Selector de categorías de métricas con el namespace `EBS` (30 métricas) destacado en la lista
+> **Figura 31** – Selector de categorías de métricas con el namespace `EBS` (30 métricas) destacado en la lista
 
 ![Métricas EBS VolumeReadBytes y VolumeWriteBytes seleccionadas](/img/sprint3/32-ebs-metrics-selected.png)
-> 📸 **Figura 32** – Lista de métricas EBS con `VolumeReadBytes` y `VolumeWriteBytes` del volumen `vol-0673cc270ab121...` seleccionados; gráfico de previsualización con ambas curvas (azul y naranja)
+> **Figura 32** – Lista de métricas EBS con `VolumeReadBytes` y `VolumeWriteBytes` del volumen `vol-0673cc270ab121...` seleccionados; gráfico de previsualización con ambas curvas (azul y naranja)
 
 ---
 
@@ -492,7 +492,7 @@ sudo chown ec2-user:ec2-user /var/log/deploy_nexorder.log
 **¿Por qué un directorio de staging?** Permite preparar y revisar los archivos antes de hacerlos públicos. El script hace un espejo exacto del staging en producción, por lo que solo lo que está en staging llega a la web.
 
 ![Preparación del entorno de despliegue](/img/sprint3/33-deploy-env-setup.png)
-> 📸 **Figura 33** – Terminal ejecutando `mkdir -p /home/ec2-user/web-staging`, `touch /var/log/deploy_nexorder.log` y `chown ec2-user` del log
+> **Figura 33** – Terminal ejecutando `mkdir -p /home/ec2-user/web-staging`, `touch /var/log/deploy_nexorder.log` y `chown ec2-user` del log
 
 ---
 
@@ -518,7 +518,7 @@ sudo chmod +x /usr/local/bin/deploy_nexorder.sh
 - **Doble validación `$?`**: se verifica por separado el éxito de `rsync` y del `reload`, con mensajes específicos para cada fallo.
 
 ![Script deploy_nexorder.sh en nano](/img/sprint3/34-deploy-script-nano.png)
-> 📸 **Figura 34** – Editor nano con el contenido completo de `deploy_nexorder.sh` mostrando la configuración, el bloque `rsync -avz --delete` y la lógica de validación `$?`
+> **Figura 34** – Editor nano con el contenido completo de `deploy_nexorder.sh` mostrando la configuración, el bloque `rsync -avz --delete` y la lógica de validación `$?`
 
 ---
 
@@ -555,13 +555,13 @@ curl -k https://localhost/version2.html
 ```
 
 ![Archivo version2.html en staging](/img/sprint3/35-staging-version2-html.png)
-> 📸 **Figura 35** – Editor nano con el contenido de `version2.html` (HTML de prueba con título `NexOrder v2.0` y mensaje de despliegue exitoso)
+> **Figura 35** – Editor nano con el contenido de `version2.html` (HTML de prueba con título `NexOrder v2.0` y mensaje de despliegue exitoso)
 
 ![Verificación post-despliegue y log](/img/sprint3/36-deploy-verification-log.png)
-> 📸 **Figura 36** – `ls -l /var/www/html/version2.html` confirmando el archivo en producción (229 bytes, May 10 16:13) + `tail -10 /var/log/deploy_nexorder.log` con las 6 líneas de auditoría del despliegue exitoso
+> **Figura 36** – `ls -l /var/www/html/version2.html` confirmando el archivo en producción (229 bytes, May 10 16:13) + `tail -10 /var/log/deploy_nexorder.log` con las 6 líneas de auditoría del despliegue exitoso
 
 ![curl HTTP y HTTPS sobre version2.html](/img/sprint3/37-deploy-curl-test.png)
-> 📸 **Figura 37** – `curl -I http://localhost/version2.html` devolviendo `301 Moved Permanently` + `curl -k https://localhost/version2.html` devolviendo el HTML completo de `NexOrder v2.0`
+> **Figura 37** – `curl -I http://localhost/version2.html` devolviendo `301 Moved Permanently` + `curl -k https://localhost/version2.html` devolviendo el HTML completo de `NexOrder v2.0`
 
 ---
 
@@ -589,11 +589,11 @@ nano ~/restore_test.md
 -rw-r--r--. 1 ec2-user ec2-user 2.4K May 12 14:00 nexorder_db_20260512_140001.sql.gz
 ```
 
-![Hora de inicio, listado de backups e informe inicial](/img/sprint3/39-restore-start-verify.png)
-> 📸 **Figura 39** – `date` mostrando `Tue May 12 14:42:27 UTC 2026` + `ls -lh /backups/*.sql.gz` con los archivos disponibles + `nano ~/restore_test.md` con el informe inicial
+![Hora de inicio, listado de backups e informe inicial](/img/sprint3/38-restore-start-verify.png)
+> **Figura 38** – `date` mostrando `Tue May 12 14:42:27 UTC 2026` + `ls -lh /backups/*.sql.gz` con los archivos disponibles + `nano ~/restore_test.md` con el informe inicial
 
-![restore_test.md en estado inicial](/img/sprint3/40-restore-report-initial.png)
-> 📸 **Figura 40** – Editor nano con el contenido inicial de `restore_test.md` con los campos pendientes de completar
+![restore_test.md en estado inicial](/img/sprint3/39-restore-report-initial.png)
+> **Figura 39** – Editor nano con el contenido inicial de `restore_test.md` con los campos pendientes de completar
 
 ---
 
@@ -627,8 +627,11 @@ EXIT;
 
 La BD `nexorder_db` con sus 5 tablas ha sido eliminada. El sistema está en estado de fallo crítico.
 
-![Simulación DROP DATABASE y verificación](/img/sprint3/41-drop-database-simulation.png)
-> 📸 **Figura 41** – Login MySQL con `connection id 5249` + `SHOW DATABASES`, `USE nexorder_db`, `SHOW TABLES` (5 tablas), `DROP DATABASE nexorder_db` con `Query OK` y `SHOW DATABASES` final devolviendo `Empty set`
+![Simulación DROP DATABASE y verificación](/img/sprint3/40-drop-database-simulation.png)
+> **Figura 40** – Login MySQL con `connection id 5249`
+
+![Simulación DROP DATABASE y verificación](/img/sprint3/41-drop-database.png)
+> **Figura 41** -- `SHOW DATABASES`, `USE nexorder_db`, `SHOW TABLES` (5 tablas), `DROP DATABASE nexorder_db` con `Query OK` y `SHOW DATABASES` final devolviendo `Empty set`
 
 ---
 
@@ -648,7 +651,7 @@ gunzip -c /backups/nexorder_db_20260512_140001.sql.gz \
 **¿Por qué el filtrado?** `mysqldump` incluye comandos de configuración de replicación (`SET @@SESSION.SQL_LOG_BIN=0`) que requieren privilegios de superusuario. En Amazon RDS, AWS no concede `SUPER` por razones de seguridad del servicio gestionado. El filtrado con `grep -v` elimina estas líneas sin afectar a los datos.
 
 ![Restauración con gunzip y filtrado SET @@](/img/sprint3/42-restore-gunzip-mysql.png)
-> 📸 **Figura 42** – Terminal con `gunzip -c backup.sql.gz | grep -v "SET @@SESSION..." | grep -v "SET @@GLOBAL" | mysql ...` + verificación posterior con `SHOW TABLES` mostrando las 5 tablas restauradas
+> **Figura 42** – Terminal con `gunzip -c backup.sql.gz | grep -v "SET @@SESSION..." | grep -v "SET @@GLOBAL" | mysql ...` + verificación posterior con `SHOW TABLES` mostrando las 5 tablas restauradas
 
 ---
 
@@ -682,7 +685,7 @@ SELECT nombre, precio FROM productos LIMIT 3;
 Los datos de prueba (`Ensalada César $8.50`, `Pizza Margarita $12.00`, `Hamburguesa Clásica $10.50`) están presentes y son correctos.
 
 ![Verificación de integridad post-restauración](/img/sprint3/43-restore-integrity-check.png)
-> 📸 **Figura 43** – MySQL mostrando `SHOW TABLES` (5 tablas), `COUNT(*)` de productos (7), usuarios (2) y estados (5), y `SELECT nombre, precio FROM productos LIMIT 3` con datos reales
+> **Figura 43** – MySQL mostrando `SHOW TABLES` (5 tablas), `COUNT(*)` de productos (7), usuarios (2) y estados (5), y `SELECT nombre, precio FROM productos LIMIT 3` con datos reales
 
 ---
 
@@ -707,10 +710,10 @@ RTO real:                        0h 24m 01s
 [Enllaç al documento: restore_test.md](/docs/src/restore_test.md)
 
 ![Hora de fin y cálculo del RTO](/img/sprint3/44-rto-calculation.png)
-> 📸 **Figura 44** – `date` mostrando `Tue May 12 15:06:28 UTC 2026` con el cálculo manual `15:06:28 - 14:42:27 = 0:24:01`
+> **Figura 44** – `date` mostrando `Tue May 12 15:06:28 UTC 2026` con el cálculo manual `15:06:28 - 14:42:27 = 0:24:01`
 
 ![restore_test.md completado](/img/sprint3/45-restore-report-final.png)
-> 📸 **Figura 45** – Editor nano con `restore_test.md` completado: hora inicio, hora fin, RTO calculado y resultado final con los tres checks
+> **Figura 45** – Editor nano con `restore_test.md` completado: hora inicio, hora fin, RTO calculado y resultado final con los tres checks
 
 ---
 
@@ -748,7 +751,7 @@ nmap -p 1-1000 -T4 -A -V 44.207.176.14
 - **Ningún servicio innecesario expuesto**: no hay APIs internas, paneles de administración ni servicios de datos accesibles públicamente.
 
 ![Escaneo nmap desde Kali Linux](/img/sprint3/45-nmap-scan-result.png)
-> 📸 **Figura 46** – Terminal Kali Linux (`kali@VictorS`) ejecutando `nmap -p 1-1000 -T4 -A -V 44.207.176.14` con la salida completa del escaneo mostrando el progreso de NSE scripts y el resultado final
+> **Figura 46** – Terminal Kali Linux (`kali@VictorS`) ejecutando `nmap -p 1-1000 -T4 -A -V 44.207.176.14` con la salida completa del escaneo mostrando el progreso de NSE scripts y el resultado final
 
 ---
 
