@@ -42,7 +42,7 @@
 
 ---
 
-## 🌐 Infraestructura de Red (Sprint 1) - Resumen Crítico
+##  Infraestructura de Red (Sprint 1) - Resumen Crítico
 
 ### Arquitectura de Red
 ![Arquitectura lógica VPC](/img/sprint1/0-diagrama-logico.png)
