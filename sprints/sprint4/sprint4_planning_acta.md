@@ -7,7 +7,7 @@
 
 ---
 
-## 📋 Índice
+## Índice
 1. [Objetivo del Sprint](#1-objetivo-del-sprint)
 2. [Alcance del Sprint (Scope)](#2-alcance-del-sprint-scope)
    - [2.1 Tareas Planificadas](#21-tareas-planificadas)
@@ -113,7 +113,7 @@ A continuació es mostra el tauler de gestió amb totes les tasques T20-T25 crea
 ![ProofHub - Tasques inicials S4](/img/sprint4/proofhub-inicial-2.png)
 ![ProofHub - Tasques inicials S4](/img/sprint4/proofhub-inicial-3.png)
 
-> 📸 **Figura 6.1:** Estat inicial del tauler ProofHub amb tasques T20-T25 en estat "Per fer".
+>  **Figura 6.1:** Estat inicial del tauler ProofHub amb tasques T20-T25 en estat "Per fer".
 
 ---
 
@@ -124,7 +124,7 @@ Estat del projecte a mitjan sprint, amb la configuració de WAF, backups S3 i SE
 ![ProofHub - Tasques en curs S4](/img/sprint4/proofhub-08maig-2.png)
 ![ProofHub - Tasques en curs S4](/img/sprint4/proofhub-08maig-3.png)
 
-> 📸 **Figura 6.2:** Avanç a 8 de maig. T20, T21, T22 completades, T23 i T24 en execució.
+> **Figura 6.2:** Avanç a 8 de maig. T20, T21, T22 completades, T23 i T24 en execució.
 
 ---
 
@@ -135,6 +135,6 @@ Tauler completat amb totes les tasques T20-T25 marcades com a completades i evid
 ![ProofHub - Tasques finalitzades S4](/img/sprint4/proofhub-final-2.png)
 ![ProofHub - Tasques finalitzades S4](/img/sprint4/proofhub-final-3.png)
 
-> 📸 **Figura 6.3:** Sprint 4 tancat. Totes les tasques a "Completat" amb projecte entregat i auditat.
+>  **Figura 6.3:** Sprint 4 tancat. Totes les tasques a "Completat" amb projecte entregat i auditat.
 
 ---
