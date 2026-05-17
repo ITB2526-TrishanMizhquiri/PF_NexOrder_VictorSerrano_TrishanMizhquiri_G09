@@ -14,7 +14,7 @@
 
 ---
 
-## 📋 Índice
+##  Índice
 
 1. [Arquitectura de Monitorización y Resiliencia](#1-arquitectura-de-monitorización-y-resiliencia)
 2. [T13: Script de Backup Automatizado](#2-t13-script-de-backup-automatizado)
