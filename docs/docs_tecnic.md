@@ -4,11 +4,11 @@
 **Período:** 13 de abril 2026 – 12 de mayo 2026  
 **Módulos:** M0370, M0369, M0375, M0378, M0374, M0377, C037
 
-> ℹ️ **Propósito:** Documento de referencia rápida para técnicos. Para detalles completos, consultar los documentos fuente enlazados.
+>  **Propósito:** Documento de referencia rápida para técnicos. Para detalles completos, consultar los documentos fuente enlazados.
 
 ---
 
-## 🔗 Documentos Fuente (Referencia Completa)
+##  Documentos Fuente (Referencia Completa)
 
 | Sprint | Documento Técnico | Enlace |
 |--------|------------------|--------|
@@ -18,7 +18,7 @@
 
 ---
 
-## 🗂️ Acceso Rápido a Scripts y Configuraciones
+##  Acceso Rápido a Scripts y Configuraciones
 
 /docs/src/
 
@@ -47,7 +47,7 @@
 ### Arquitectura de Red
 ![Arquitectura lógica VPC](/img/sprint1/0-diagrama-logico.png)
 
-📸 **Figura 1** – Arquitectura de red con segregación pública/privada y defensa en profundidad
+ **Figura 1** – Arquitectura de red con segregación pública/privada y defensa en profundidad
 
 ### Componentes Clave
 | Recurso | ID / Valor | Propósito |
@@ -62,7 +62,7 @@
 ### Tablas de Enrutamiento
 ![Tabla de enrutamiento pública](/img/sprint1/8-rt-publica.png)
 
-📸 **Figura 2** – RT-Publica-NexOrder con ruta `0.0.0.0/0 → IGW` para acceso a Internet
+ **Figura 2** – RT-Publica-NexOrder con ruta `0.0.0.0/0 → IGW` para acceso a Internet
 
 ### Security Groups
 | Grupo | Reglas Clave | Propósito |
@@ -72,7 +72,7 @@
 
 ![Creación de SG-DB-NexOrder](/img/sprint1/18-sg-db.png)
 
-📸 **Figura 3** – SG-DB-NexOrder referenciando SG-Web (no IPs fijas) para mayor seguridad
+ **Figura 3** – SG-DB-NexOrder referenciando SG-Web (no IPs fijas) para mayor seguridad
 
 ### Hardening SSH Aplicado
 ```bash
@@ -82,16 +82,16 @@ PubkeyAuthentication yes
 Usuario: nexadmin (sudo restringido)
 ```
 
-🔗 **Más detalles:** [`docs/infra_vpc.md`](docs/infra_vpc.md)
+ **Más detalles:** [`docs/infra_vpc.md`](docs/infra_vpc.md)
 
 ---
 
-## 🌐 Servicios Web y Seguridad (Sprint 2) - Resumen Crítico
+##  Servicios Web y Seguridad (Sprint 2) - Resumen Crítico
 
 ### Arquitectura de Servicios
 ![Arquitectura de servicios web](/img/sprint2/0-arquitectura-web.png)
 
-📸 **Figura 4** – Stack completo de aplicación web con seguridad en cada capa
+ **Figura 4** – Stack completo de aplicación web con seguridad en cada capa
 
 ### Stack de Aplicación
 | Componente | Versión / Configuración | Propósito |
@@ -110,7 +110,7 @@ Usuario: nexadmin (sudo restringido)
 
 ![Configuración VirtualHost SSL](/img/sprint2/9-ssl-config.png)
 
-📸 **Figura 5** – nexorder-ssl.conf con redirección 301 y cabecera HSTS
+ **Figura 5** – nexorder-ssl.conf con redirección 301 y cabecera HSTS
 
 ### Control de Acceso MySQL
 ```sql
@@ -120,22 +120,22 @@ Plugin: mysql_native_password
 BD: nexorder_db (utf8mb4)
 ```
 
-✅ **Validación:** `CREATE TABLE` falla con `ERROR 1142` → mínimo privilegio activo
+ **Validación:** `CREATE TABLE` falla con `ERROR 1142` → mínimo privilegio activo
 
 ![Verificación de permisos MySQL](/img/sprint2/25-show-grants.png)
 
-📸 **Figura 6** – SHOW GRANTS confirmando permisos restringidos de nexorder_app
+ **Figura 6** – SHOW GRANTS confirmando permisos restringidos de nexorder_app
 
-🔗 **Más detalles:** [`docs/infra_webserver.md`](docs/infra_webserver.md)
+ **Más detalles:** [`docs/infra_webserver.md`](docs/infra_webserver.md)
 
 ---
 
-## 🌐 Monitorización y Resiliencia (Sprint 3) - Resumen Crítico
+##  Monitorización y Resiliencia (Sprint 3) - Resumen Crítico
 
 ### Arquitectura de Operaciones
 ![Arquitectura de monitorización](/img/sprint3/0-arquitectura.png)
 
-📸 **Figura 7** – Diagrama de flujos de backup, monitorización y despliegue continuo
+ **Figura 7** – Diagrama de flujos de backup, monitorización y despliegue continuo
 
 ### Automatización de Backups
 | Parámetro | Valor |
@@ -148,7 +148,7 @@ BD: nexorder_db (utf8mb4)
 
 ![Script de backup automatizado](/img/sprint3/2-backup-script-nano.png)
 
-📸 **Figura 8** – backup_nexorder.sh con pipeline mysqldump | gzip y control de errores
+ **Figura 8** – backup_nexorder.sh con pipeline mysqldump | gzip y control de errores
 
 ### Rotación de Logs (Logrotate)
 | Servicio | Configuración | Propósito |
@@ -165,7 +165,7 @@ BD: nexorder_db (utf8mb4)
 
 ![Dashboard CloudWatch](/img/sprint3/27-dashboard-final.png)
 
-📸 **Figura 9** – Dashboard con CPU (línea) y métricas EBS (números) en tiempo real
+ **Figura 9** – Dashboard con CPU (línea) y métricas EBS (números) en tiempo real
 
 ### Despliegue Continuo
 ```bash
@@ -179,13 +179,13 @@ Log: /var/log/deploy_nexorder.log
 | Métrica | Valor |
 |---------|-------|
 | **RTO Medido** | 24 min 01 s |
-| **Objetivo** | < 30 min ✅ |
+| **Objetivo** | < 30 min  |
 | **Procedimiento** | `DROP DB` → `gunzip \| grep -v "SET@@" \| mysql` → `SHOW TABLES` + `COUNT(*)` |
 | **Nota RDS** | Filtrar `SET @@SESSION.SQL_LOG_BIN` y `SET @@GLOBAL` por restricciones `SUPER` |
 
 ![Restauración de base de datos](/img/sprint3/42-restore-gunzip-mysql.png)
 
-📸 **Figura 10** – Restauración con filtrado grep -v para compatibilidad con RDS
+ **Figura 10** – Restauración con filtrado grep -v para compatibilidad con RDS
 
 ### Auditoría de Seguridad (nmap)
 ```bash
@@ -196,13 +196,13 @@ Interpretación: Superficie de exposición mínima, consistente con mínimo priv
 
 ![Escaneo nmap de seguridad](/img/sprint3/46-nmap-scan-result.png)
 
-📸 **Figura 11** – nmap confirmando solo 3 puertos expuestos (superficie mínima)
+ **Figura 11** – nmap confirmando solo 3 puertos expuestos (superficie mínima)
 
-🔗 **Más detalles:** [`docs/infra_monitoring.md`](docs/infra_monitoring.md)
+ **Más detalles:** [`docs/infra_monitoring.md`](docs/infra_monitoring.md)
 
 ---
 
-## 📊 Resumen de Criterios Cumplidos
+##  Resumen de Criterios Cumplidos
 
 | Código | Descripción | Sprint | Estado |
 |--------|-------------|--------|--------|
@@ -216,7 +216,7 @@ Interpretación: Superficie de exposición mínima, consistente con mínimo priv
 
 ---
 
-## 🚨 Comandos de Emergencia (Quick Reference)
+##  Comandos de Emergencia (Quick Reference)
 
 ### Restaurar Base de Datos
 ```bash
@@ -271,7 +271,7 @@ df -h / /backups /var/log
 
 ---
 
-## 📞 Contacto del Equipo
+##  Contacto del Equipo
 
 | Rol | Nombre | Canal |
 |-----|--------|-------|
