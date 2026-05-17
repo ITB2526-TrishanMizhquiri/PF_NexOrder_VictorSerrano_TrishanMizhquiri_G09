@@ -1,7 +1,3 @@
-Aquí tienes los documentos **`docs/actas/sprint4_planning.md`** y **`docs/actas/sprint4_review.md`** generados con la misma estructura exacta que los Sprints 1-3, adaptados al contenido del Sprint 4 (entrega final):
-
----
-
 ## 📄 `docs/actas/sprint4_planning.md`
 
 ```markdown
