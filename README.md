@@ -15,7 +15,7 @@
 
 ##  Índice
 - [ Sobre el Proyecto](#-sobre-el-proyecto)
-- [ Arquitectura en la Nube](#️-arquitectura-en-la-nube)
+- [ Arquitectura en la Nube](-arquitectura-en-la-nube)
 - [ Sprint Timeline](#-sprint-timeline)
 - [ Estructura del Repositorio](#-estructura-del-repositorio)
 - [ Documentación Técnica](#-documentación-técnica)
