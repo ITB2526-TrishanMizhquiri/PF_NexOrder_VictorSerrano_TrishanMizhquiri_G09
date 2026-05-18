@@ -234,7 +234,7 @@ La base de datos RDS se despliega en la subred privada para garantizar su aislam
 | Internet Access Gateway |  Disabled |
 | IAM Authentication |  Disabled |
 
->  **Nota de seguridad:** La contraseña `N3x0r-DB-2025!Sec` debe almacenarse inmediatamente en un gestor de contraseñas (1Password, Bitwarden, AWS Secrets Manager, etc.). No debe quedar en texto plano en ningún fichero del repositorio.
+>  **Nota de seguridad:** La contraseña `N3x0r-DB-2026!Sec` debe almacenarse inmediatamente en un gestor de contraseñas (1Password, Bitwarden, AWS Secrets Manager, etc.). No debe quedar en texto plano en ningún fichero del repositorio.
 
 ![Figura 13](/img/sprint1/13-rds-creating.png) 
 >  **Figura 13 – Panel de RDS nexorder-db:** en estado `Creating` (MySQL Community, db.t3.micro)
