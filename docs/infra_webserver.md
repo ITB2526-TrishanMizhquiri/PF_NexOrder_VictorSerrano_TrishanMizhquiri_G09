@@ -690,6 +690,9 @@ sudo firewall-cmd --permanent --add-service=http
 # Permitir tráfico HTTPS (puerto 443) de forma permanente
 sudo firewall-cmd --permanent --add-service=https
 
+#Permitir trafico ssh 
+sudo firewall-cmd --permanent --add-service=ssh
+
 # Aplicar cambios sin reiniciar el servicio
 sudo firewall-cmd --reload
 
@@ -738,9 +741,31 @@ https://44.207.176.14/index.php
 
 ---
 
-## 8. Justificación de Criterios
+## 9 Cabeceras de Seguridad Avanzadas en Apache
+Hemos editado el fichero de configuración de httpd.conf y añadimos los siguiente para la protecciones de Header 
+**ServerTokens Prod**:Nos da el mínimo la información de la cabecera Server mostrando solo la palabra  "Apache"
 
-### 8.1 M0375 – Servicios de Red
+**ServerSignature Off**:Desactiva el pie de página automático del servidor en las pantallas de error (como los errores 404)
+
+**Header always set Server " "** :sobrescribe la firma forzando un espacio en blanco para que ningún escáner sepa qué software web utilizas
+
+**Header always set X-Frame-Options "DENY"** :Prohíbe que tu web sea incrustada dentro de marcos (iframes) de otras páginas anulando por completo ataques de secuestro de clic
+
+**Header always set X-Content-Type-Options "nosniff"**: Obliga al navegador a respetar estrictamente el formato de los archivos (HTML, CSS, JS)
+
+**Header always set X-XSS-Protection "1; mode=block"**:Activa el filtro de seguridad interno del navegador y bloquea la carga de la página automáticamente si detecta un ataque de inyección de código
+
+**Header always set Content-Security-Policy "default-src 'self'; ...":** el navegador solo tiene permiso para cargar imágenes, estilos y scripts que pertenezcan a tu propio dominio seguro
+<img width="1504" height="318" alt="image" src="https://github.com/user-attachments/assets/a24bdc8f-3a19-47ac-9169-95b6caebb7f6" />
+
+Comprobamos que con curl 
+<img width="1188" height="252" alt="image" src="https://github.com/user-attachments/assets/64346aa9-0097-4676-8a44-e62a8d6521d9" />
+
+
+
+## 10. Justificación de Criterios
+
+### 10.1 M0375 – Servicios de Red
 
 | Evidencia | Tarea | Estado |
 |-----------|-------|--------|
@@ -751,7 +776,7 @@ https://44.207.176.14/index.php
 | Validación de conectividad con `curl` y `ss` | T07, T08, T12 | ✅ |
 | Apertura controlada de puertos con `firewall-cmd` | T12 | ✅ |
 
-### 8.2 M0378 – Administración de Servidores
+### 10.2 M0378 – Administración de Servidores
 
 | Evidencia | Tarea | Estado |
 |-----------|-------|--------|
@@ -762,7 +787,7 @@ https://44.207.176.14/index.php
 | Despliegue y gestión de archivos web con permisos correctos | T12 | ✅ |
 | Resolución de incidencias (módulos Apache, firewalld) | T08, T12 | ✅ |
 
-### 8.3 C037 – Seguridad y Resiliencia
+### 10.3 C037 – Seguridad y Resiliencia
 
 | Evidencia | Tarea | Mecanismo |
 |-----------|-------|-----------|
@@ -773,8 +798,3 @@ https://44.207.176.14/index.php
 | PDO con `EMULATE_PREPARES => false` y `htmlspecialchars()` | T12 | Prevención SQLi y XSS |
 | Certificado autofirmado RSA 2048, validez controlada | T08 | Integridad de comunicaciones |
 
----
-
-*Documentación completada: 20–26 de abril de 2026*
-
-*Autores: Victor Serrano · Trishan Mizhquiri*
