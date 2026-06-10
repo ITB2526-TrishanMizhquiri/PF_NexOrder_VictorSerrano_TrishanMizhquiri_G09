@@ -626,7 +626,7 @@ curl localhost
 
 > 📸 **Figura 4** – Terminal con `systemctl start httpd` y `systemctl enable httpd` creando el symlink de arranque automático
 
-![status httpd](/img/sprint2/5-status-httpd.png)
+![status httpd](/img/sprint2/5-status.httpd.png)
 
 > 📸 **Figura 5** – `systemctl status httpd` mostrando `active (running)` con PID 26333, puerto 80 en escucha
 
@@ -1676,7 +1676,7 @@ Se crea un dashboard centralizado para visualizar en tiempo real los indicadores
 
 > 📸 **Figura 29** – Selector de métricas con `CPUUtilization` de `NexOrder-EC2-Web` marcado; tipo de widget cambiado a `Número`
 
-![Widget CPU line graph](/img/sprint3/30-widget-cpu-line-graph.png)
+![Widget CPU line graph](/img/sprint3/30-widget-cpu-line-grap.png)
 
 > 📸 **Figura 30** – Pantalla "Añadir gráfico de métrica" con `CPUUtilization` seleccionado y lista completa de métricas EC2 disponibles
 
@@ -1960,8 +1960,113 @@ nmap -p 1-1000 -T4 -A -V 44.207.176.14
 - Conexión estable: baja latencia entre la máquina Kali y el servidor AWS confirma conectividad correcta.
 - Ningún servicio innecesario expuesto: no hay APIs internas, paneles de administración ni servicios de datos accesibles públicamente.
 
-![Nmap scan result](/img/sprint3/45-nmap-scan-result.png)
+![Nmap scan result](/img/sprint3/46-nmap-scan-result.png)
 
 > 📸 **Figura 46** – Terminal Kali Linux (`kali@VictorS`) ejecutando `nmap -p 1-1000 -T4 -A -V 44.207.176.14` con la salida completa del escaneo mostrando el progreso de NSE scripts y el resultado final
 
 ---
+## Acceso Rápido a Scripts y Configuraciones
+
+
+```
+/docs/src/
+├── [backup_nexorder.sh](/docs/src/backup_nexorder.sh)     # Script backup automatizado (T13)
+├── [deploy_nexorder.sh](/docs/src/deploy_nexorder.sh)     # Script despliegue continuo (T17)
+├── [restore_test.md](/docs/src/restore_test.md)           # Informe prueba DR + RTO (T18)
+├── [jail.local](/docs/src/jail.local)                     # Configuración Fail2ban (T09)
+├── [nexorder-ssl.conf](/docs/src/nexorder-ssl.conf)       # VirtualHost HTTPS + HSTS (T08)
+├── [nexorder_schema.sql](/docs/src/nexorder_schema.sql)   # Esquema completo BD (T10)
+├── [connexio.php](/docs/src/connexio.php)                 # Motor conexión PDO (T12)
+├── [panel.php](/docs/src/panel.php)                       # Panel estado + consulta segura (T12)
+└── [index.php](/docs/src/index.php)                       # Página principal menú (T12)
+```
+
+
+---
+
+
+## Comandos de Emergencia (Quick Reference)
+
+
+### Restaurar Base de Datos
+```bash
+# 1. Verificar backup disponible
+ls -lh /backups/*.sql.gz | tail -1
+
+
+# 2. Restaurar (filtrando sentencias incompatibles con RDS)
+gunzip -c /backups/nexorder_db_*.sql.gz \
+  | grep -v "SET @@SESSION.SQL_LOG_BIN" \
+  | grep -v "SET @@GLOBAL" \
+  | mysql -h <ENDPOINT> -u admin -p nexorder_db
+
+
+# 3. Verificar integridad
+mysql -h <ENDPOINT> -u admin -p -e "USE nexorder_db; SHOW TABLES; SELECT COUNT(*) FROM productos;"
+```
+
+
+### Revertir Despliegue (Rollback)
+```bash
+# 1. Copiar versión anterior desde backup o staging
+sudo rsync -avz --delete /home/ec2-user/web-staging-backup/ /var/www/html/
+
+
+# 2. Recargar Apache
+sudo systemctl reload httpd
+
+
+# 3. Verificar
+curl -k https://localhost/
+```
+
+
+### Desbloquear IP en Fail2ban
+```bash
+# Ver IPs bloqueadas
+sudo fail2ban-client status sshd
+
+
+# Desbanear IP específica
+sudo fail2ban-client set sshd unbanip <IP>
+
+
+# Reiniciar jail si es necesario
+sudo fail2ban-client reload
+```
+
+
+### Verificar Estado de Servicios
+```bash
+# Servicios críticos
+systemctl status httpd crond fail2ban
+
+
+# Puertos activos
+ss -tlnp | grep -E ':(80|443|22|3306)'
+
+
+# Espacio en disco
+df -h / /backups /var/log
+```
+
+---
+
+
+## Contacto del Equipo
+
+
+| Rol | Nombre | Canal |
+|-----|--------|-------|
+| Responsable Infraestructura | Victor Serrano | victor.serrano@nexorder.local |
+| Responsable Seguridad | Trishan Mizhquiri | trishan.mizhquiri@email.com |
+| Emergencias 24/7 | Equipo NexOrder | SNS Topic: `NexOrder_Alerts` |
+
+
+---
+
+**Documentación completada:** 13 de abril – 12 de mayo 2026  
+**Responsables:** Victor Serrano · Trishan Mizhquiri  
+**Repositorio:** GitHub + documentación Markdown + evidencias ProofHub
+ 
+> **Nota de Seguridad:** Contraseñas y claves sensibles gestionadas mediante gestor de contraseñas externo (no almacenadas en documentación).
