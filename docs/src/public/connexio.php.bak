@@ -1,0 +1,46 @@
+<?php
+// FORZAR VISUALIZACIÓN DE ERRORES (solo para debugging)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+echo "<!-- DEBUG: Script iniciado -->\n";
+
+// ⚠️ CONFIGURACIÓN RDS - REEMPLAZA CON TUS DATOS REALES
+$host = 'nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com';
+$db   = 'nexorder_db';
+$user = 'nexorder_app';
+$pass = 'N3x0r-DB-2026!Sec';
+$charset = 'utf8mb4';
+
+echo "<!-- DEBUG: Intentando conectar a $host/$db como $user -->\n";
+
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+    PDO::ATTR_TIMEOUT            => 5, // ⚠️ Timeout de 5 segundos para no colgar
+];
+
+try {
+    echo "<!-- DEBUG: Creando instancia PDO... -->\n";
+    $pdo = new PDO($dsn, $user, $pass, $options);
+    echo "<h1>✅ Conexión exitosa a RDS MySQL 8.0</h1>";
+    echo "<p><strong>Host:</strong> " . htmlspecialchars($host) . "</p>";
+    echo "<p><strong>BD:</strong> " . htmlspecialchars($db) . "</p>";
+    echo "<p><strong>Usuario:</strong> " . htmlspecialchars($user) . "</p>";
+} catch (PDOException $e) {
+    echo "<h1>❌ Error PDO</h1>";
+    echo "<p><strong>Código:</strong> " . htmlspecialchars($e->getCode()) . "</p>";
+    echo "<p><strong>Mensaje:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "<p><strong>File:</strong> " . htmlspecialchars($e->getFile()) . ":" . $e->getLine() . "</p>";
+} catch (Exception $e) {
+
+    echo "<h1>❌ Error Genérico</h1>";
+    echo "<p><strong>Mensaje:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+}
+
+echo "<!-- DEBUG: Script finalizado -->\n";
+echo '<p style="margin-top: 2rem;"><a href="index.php" style="display: inline-block; padding: 0.5rem 1rem; background: #0d6efd; color: white; text-decoration: none; border-radius: 4px;">⬅️ Volver al menú principal</a></p>';
+?>

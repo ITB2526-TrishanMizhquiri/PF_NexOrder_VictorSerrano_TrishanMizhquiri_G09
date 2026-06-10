@@ -1,6 +1,4 @@
 <?php
-// NexOrder - Panel de Estado (T12)
-// Conexión independiente para evitar dependencia de connexio.php
 
 $host = "nexorder-db.cijbieo4judf.us-east-1.rds.amazonaws.com";
 $db   = "nexorder_db";
